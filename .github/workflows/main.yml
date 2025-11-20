@@ -1,0 +1,45 @@
+name: Daily Radio Update
+
+# 触发条件：每天国际时间 0点 (北京时间早上8点) 运行
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  # 允许你手动点按钮测试
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # 给机器人写文件的权限
+    permissions:
+      contents: write
+
+    steps:
+      # 1. 把代码拉下来
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. 安装 Python 环境
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      # 3. 安装配音软件
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      # 4. 运行你的脚本 (生成 MP3)
+      - name: Run script
+        run: python update_news.py
+
+      # 5. 把生成的 MP3 保存回仓库
+      - name: Save changes
+        run: |
+          git config --global user.name "RadioBot"
+          git config --global user.email "bot@example.com"
+          git add .
+          # 如果有新文件就提交，没有就不报错
+          git commit -m "Auto-update: New Radio Show" || exit 0
+          git push
