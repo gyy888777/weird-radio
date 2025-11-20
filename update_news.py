@@ -5,8 +5,6 @@ import asyncio
 import edge_tts
 
 # --- 1. 模拟多领域新闻抓取 ---
-# 实际项目中，这里应该替换为去 36Kr(科技), 微博(娱乐), 贴吧(奇闻) 的爬虫
-
 def get_tech_news():
     templates = [
         ("OpenAI发布GPT-6", "新模型甚至学会了帮程序员写周报，效率提升500%。"),
@@ -36,34 +34,28 @@ def get_weird_news():
 
 def generate_items(templates, category, tags):
     items = []
-    # 随机选 3 条
     selected = random.sample(templates, 3)
     for title, detail in selected:
         items.append({
-            "category": category, # 新增分类字段
+            "category": category,
             "tag": random.choice(tags),
             "title": title,
-            "summary": detail # 这里只存详情，不重复标题
+            "summary": detail
         })
     return items
 
 # --- 2. 生成“不啰嗦”的广播稿 ---
 def create_smart_script(all_news, date_str, hour_str):
-    # 开场白
     script = f"各位听众好，现在是北京时间{hour_str}点整。欢迎收听《全网资讯通》。我是AI主播。"
     
-    # --- 科技板块 ---
     script += "首先关注【科技前沿】。"
     for item in [n for n in all_news if n['category'] == '科技']:
-        # 话术优化：标题 + 详情
         script += f"{item['title']}。据悉，{item['summary']} "
     
-    # --- 娱乐板块 ---
     script += "接下来是【娱乐吃瓜】时间。"
     for item in [n for n in all_news if n['category'] == '娱乐']:
         script += f"关于{item['title']}的消息。{item['summary']} "
 
-    # --- 奇闻板块 ---
     script += "最后来点【天下奇闻】轻松一下。"
     for item in [n for n in all_news if n['category'] == '奇闻']:
         script += f"你敢信吗？{item['title']}！具体情况是这样的：{item['summary']} "
@@ -71,24 +63,33 @@ def create_smart_script(all_news, date_str, hour_str):
     script += "以上就是本时段的全部内容，感谢收听，我们下个整点见！"
     return script
 
-# --- 3. 批量生成音频 ---
+# --- 3. 批量生成音频 (防封锁修复版) ---
 VOICES = [
-    {"id": "yunxi", "name": "zh-CN-YunxiNeural"},   # 男声
-    {"id": "xiaoxiao", "name": "zh-CN-XiaoxiaoNeural"}, # 女声
-    {"id": "liaoning", "name": "zh-CN-LiaoningNeural"}  # 东北
+    {"id": "yunxi", "name": "zh-CN-YunxiNeural"},
+    {"id": "xiaoxiao", "name": "zh-CN-XiaoxiaoNeural"},
+    {"id": "liaoning", "name": "zh-CN-LiaoningNeural"}
 ]
 
 async def generate_all_audios(text):
     print("开始生成音频...")
-    tasks = []
+    
+    # 【关键修复】把原来的并发改成循环排队
     for voice in VOICES:
         filename = f"radio_{voice['id']}.mp3"
-        print(f"生成: {filename}...")
-        communicate = edge_tts.Communicate(text, voice["name"])
-        tasks.append(communicate.save(filename))
-    
-    await asyncio.gather(*tasks)
-    print("音频生成完毕！")
+        print(f"正在生成: {filename}...")
+        
+        try:
+            communicate = edge_tts.Communicate(text, voice["name"])
+            await communicate.save(filename)
+            print(f"✅ {filename} 成功！")
+            
+            # 【关键修复】生成完一个休息 2 秒，防止 401 报错
+            await asyncio.sleep(2)
+            
+        except Exception as e:
+            print(f"❌ {filename} 失败: {e}")
+
+    print("所有音频生成完毕！")
 
 # --- 主程序 ---
 if __name__ == "__main__":
@@ -98,7 +99,7 @@ if __name__ == "__main__":
     today_str = beijing_now.strftime("%Y-%m-%d")
     hour_str = beijing_now.strftime("%H")
     
-    # 2. 聚合所有新闻 (3科技 + 3娱乐 + 3奇闻 = 9条)
+    # 2. 聚合所有新闻
     all_news = get_tech_news() + get_ent_news() + get_weird_news()
     
     # 3. 保存数据
