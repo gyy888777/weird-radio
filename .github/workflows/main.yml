@@ -1,53 +1,43 @@
 name: Hourly Weird News Update
 
-# 触发条件：每小时的第 5 分钟运行一次
-# (cron 语法: 分 时 日 月 周)
-# '5 * * * *' 表示：每个小时的 05 分 (比如 8:05, 9:05...)
-# 为什么不是整点？因为整点 GitHub 服务器很忙，稍微错开几分钟运行更稳定。
 on:
   schedule:
     - cron: '5 * * * *'
-  # 允许手动点击按钮触发
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # 给机器人写文件的权限 (重要!)
     permissions:
       contents: write
 
     steps:
-      # 1. 把代码拉下来
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. 设置时区为北京时间 (这样 Python 脚本里的时间才对)
       - name: Set timezone
         run: sudo timedatectl set-timezone Asia/Shanghai
 
-      # 3. 安装 Python 环境
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
-      # 4. 安装依赖
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
 
-      # 5. 运行你的脚本 (生成 3 个 MP3 和 1 个 JSON)
       - name: Run script
         run: python update_news.py
 
-      # 6. 把生成的所有文件保存回仓库
       - name: Save changes
         run: |
           git config --global user.name "RadioBot"
           git config --global user.email "bot@example.com"
-          # 添加所有新文件 (包括 radio_yunxi.mp3, radio_xiaoxiao.mp3 等)
           git add .
-          # 提交信息里加上时间
           git commit -m "Hourly Update: $(date +'%H:%M')" || exit 0
-          git push
+          
+          # --- 关键修复在这里 ---
+          # 先把你在网页上改的拉下来，合并，然后再推上去
+          git pull --rebase origin main
+          git push origin main
