@@ -3,158 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>奇闻电台 · Daily Weird</title>
+    <title>奇闻电台 · 每小时更新</title>
     <style>
-        /* 引入酷炫字体 */
         @import url('https://fonts.googleapis.com/css2?family=Zcool+KuaiLe&family=Noto+Sans+SC:wght@400;700&display=swap');
 
         :root {
-            --bg-color: #050505;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --accent: #d946ef; /* 霓虹紫 */
-            --text-main: #ffffff;
+            --bg: #0a0a0f;
+            --card: rgba(255, 255, 255, 0.08);
+            --accent: #8a2be2; /* 蓝紫 */
+            --accent-glow: rgba(138, 43, 226, 0.6);
+            --text: #fff;
         }
 
         body {
-            background-color: var(--bg-color);
+            background-color: var(--bg); color: var(--text);
             font-family: 'Noto Sans SC', sans-serif;
-            color: var(--text-main);
-            margin: 0; padding: 0;
-            height: 100vh; overflow: hidden; display: flex; flex-direction: column;
+            margin: 0; height: 100vh; display: flex; flex-direction: column;
+            background-image: radial-gradient(circle at 50% -20%, #2a0a4a, #0a0a0f 60%);
+            overflow: hidden;
         }
 
-        /* 顶部光效 */
-        .weird-light {
-            position: fixed; top: -20%; left: 20%; width: 80%; height: 60%;
-            background: radial-gradient(circle, rgba(217, 70, 239, 0.2), transparent 60%);
-            filter: blur(80px); z-index: -1;
+        /* 背景光 */
+        .ambient-light {
+            position: fixed; width: 100%; height: 100%; pointer-events: none; z-index: -1;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
         }
 
         header {
-            padding: 20px; text-align: center; backdrop-filter: blur(10px);
+            padding: 20px; text-align: center;
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
         }
+
+        .status-bar { font-size: 12px; color: #888; letter-spacing: 1px; margin-bottom: 5px; }
+        .live-dot { display: inline-block; width: 8px; height: 8px; background: #f00; border-radius: 50%; margin-right: 5px; box-shadow: 0 0 10px #f00; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
         h1 { 
-            font-family: 'Zcool KuaiLe', cursive;
-            font-size: 28px; color: var(--accent); margin: 10px 0;
+            font-family: 'Zcool KuaiLe', cursive; font-size: 32px; margin: 10px 0;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text; color: transparent;
+            text-shadow: 0 0 20px var(--accent-glow);
         }
 
-        .date-badge { font-size: 12px; color: #666; letter-spacing: 2px; }
-
-        /* 播放器 */
-        .player-box {
-            background: rgba(255,255,255,0.05); border-radius: 20px; padding: 15px;
-            margin: 0 auto 10px; max-width: 600px; width: 90%;
-            border: 1px solid rgba(217, 70, 239, 0.3);
-            text-align: center;
+        /* 播放器卡片 */
+        .player-card {
+            background: var(--card); padding: 20px; border-radius: 24px;
+            margin: 15px auto; max-width: 500px; width: 90%;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
         }
 
-        .btn-play {
-            width: 60px; height: 60px; border-radius: 50%;
-            background: var(--accent); border: none; color: #fff;
-            font-size: 24px; cursor: pointer; 
-            box-shadow: 0 0 20px var(--accent); transition: 0.2s;
+        /* 声音选择器 */
+        .voice-selector {
+            display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;
+            flex-wrap: wrap;
         }
-        .btn-play:hover { transform: scale(1.05); }
-        
-        /* 简单的跳动波形 */
-        .bars { display: flex; justify-content: center; gap: 3px; height: 30px; margin-bottom: 10px; align-items: flex-end; }
-        .bar { width: 4px; background: var(--accent); height: 5px; transition: 0.1s; }
+        .voice-btn {
+            background: rgba(0,0,0,0.3); border: 1px solid #555; color: #aaa;
+            padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 12px;
+            transition: 0.3s;
+        }
+        .voice-btn.active {
+            background: var(--accent); color: #fff; border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        /* 可视化条 */
+        .viz-container { display: flex; justify-content: center; gap: 4px; height: 40px; align-items: flex-end; margin-bottom: 20px; }
+        .bar { width: 6px; background: var(--accent); border-radius: 3px; height: 5px; transition: height 0.1s ease; opacity: 0.8; }
+
+        /* 播放按钮 */
+        .play-btn {
+            width: 70px; height: 70px; border-radius: 50%;
+            background: var(--accent); border: none; color: #fff; font-size: 28px;
+            cursor: pointer; box-shadow: 0 0 30px var(--accent-glow);
+            transition: 0.3s; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto;
+        }
+        .play-btn:hover { transform: scale(1.05); background: #9d4edd; }
+        .play-btn:active { transform: scale(0.95); }
 
         /* 新闻列表 */
-        main { flex: 1; overflow-y: auto; padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; }
-        
-        .news-card {
-            background: var(--card-bg); padding: 15px; margin-bottom: 15px; 
-            border-radius: 8px; border-left: 4px solid #555;
+        main {
+            flex: 1; overflow-y: auto; padding: 20px; max-width: 800px; margin: 0 auto; width: 100%;
+            /* 隐藏滚动条 */
+            scrollbar-width: none; -ms-overflow-style: none;
         }
-        .news-card.active { border-left-color: var(--accent); background: rgba(217, 70, 239, 0.1); }
+        main::-webkit-scrollbar { display: none; }
+
+        .news-item {
+            background: var(--card); padding: 15px; margin-bottom: 15px;
+            border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s;
+        }
+        .news-item:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px); }
         
-        .tag { background: #333; font-size: 12px; padding: 2px 6px; border-radius: 4px; color: #aaa; margin-right: 5px;}
-        .title { font-size: 16px; font-weight: bold; display: block; margin-top: 5px;}
-        .summary { font-size: 14px; color: #aaa; margin-top: 5px; line-height: 1.5; }
+        .tag { background: var(--accent); color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 10px; font-weight: bold; }
+        .title { font-size: 16px; font-weight: bold; margin-top: 8px; display: block; line-height: 1.4; }
+        .summary { font-size: 13px; color: #aaa; margin-top: 8px; line-height: 1.6; }
 
     </style>
 </head>
 <body>
 
-<div class="weird-light"></div>
+<div class="ambient-light"></div>
 
 <header>
-    <div class="date-badge" id="dateDisplay">LOADING...</div>
-    <h1>👻 奇闻电台</h1>
+    <div class="status-bar"><span class="live-dot"></span>LIVE | <span id="timeDisplay">加载中...</span></div>
+    <h1>⚡ 奇闻电台 ⚡</h1>
     
-    <div class="player-box">
-        <div class="bars" id="viz">
+    <div class="player-card">
+        <div class="voice-selector" id="voiceContainer">
             </div>
-        <button class="btn-play" id="playBtn">▶</button>
+
+        <div class="viz-container" id="viz">
+            </div>
+
+        <button class="play-btn" id="playBtn">
+            <svg id="playIcon" viewBox="0 0 24 24" width="32" height="32" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="pauseIcon" viewBox="0 0 24 24" width="32" height="32" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
     </div>
 </header>
 
 <main id="newsContainer">
-    <div style="text-align:center; color:#666; margin-top:50px;">正在寻找今日奇闻...</div>
+    <div style="text-align:center; color:#666; margin-top:50px;">正在接入量子信号...</div>
 </main>
 
-<audio id="audioPlayer" src="daily_radio.mp3"></audio>
+<audio id="audioPlayer"></audio>
 
 <script>
-    // 1. 初始化波形条
+    // --- 初始化 UI ---
     const viz = document.getElementById('viz');
-    for(let i=0; i<15; i++) {
+    for(let i=0; i<20; i++) { // 生成20个波形条
         let b = document.createElement('div');
         b.className = 'bar';
         viz.appendChild(b);
     }
 
-    // 2. 读取 JSON 数据
+    const audio = document.getElementById('audioPlayer');
+    const playBtn = document.getElementById('playBtn');
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const bars = document.querySelectorAll('.bar');
+    const voiceContainer = document.getElementById('voiceContainer');
+
+    let vizTimer;
+    let currentVoiceId = 'yunxi'; // 默认声音
+
+    // --- 核心逻辑 ---
     fetch('news_data.json')
         .then(res => res.json())
         .then(data => {
-            document.getElementById('dateDisplay').innerText = data.date;
-            const container = document.getElementById('newsContainer');
-            container.innerHTML = ''; // 清空 Loading
+            // 1. 更新时间
+            document.getElementById('timeDisplay').innerText = `${data.date} ${data.hour}:00 更新`;
             
-            data.news.forEach((item, idx) => {
-                let div = document.createElement('div');
-                div.className = 'news-card';
-                div.id = 'card-' + idx;
-                div.innerHTML = `
-                    <span class="tag">${item.tag}</span>
-                    <span class="title">${item.title}</span>
-                    <div class="summary">${item.summary}</div>
+            // 2. 生成声音选择按钮
+            data.voices.forEach((voice, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `voice-btn ${voice.id === currentVoiceId ? 'active' : ''}`;
+                btn.innerText = voice.label;
+                btn.onclick = () => changeVoice(voice.id);
+                voiceContainer.appendChild(btn);
+            });
+            // 预加载默认音频
+            audio.src = `radio_${currentVoiceId}.mp3`;
+
+            // 3. 渲染新闻列表
+            const container = document.getElementById('newsContainer');
+            container.innerHTML = '';
+            data.news.forEach(item => {
+                container.innerHTML += `
+                    <div class="news-item">
+                        <span class="tag">${item.tag}</span>
+                        <span class="title">${item.title}</span>
+                        <div class="summary">${item.summary}</div>
+                    </div>
                 `;
-                container.appendChild(div);
             });
         })
-        .catch(err => console.log("还没有生成数据，请运行 Python 脚本"));
+        .catch(err => {
+            document.getElementById('newsContainer').innerHTML = '<div style="text-align:center; color:#f00;">信号中断，请检查数据文件！</div>';
+        });
 
-    // 3. 播放控制
-    const audio = document.getElementById('audioPlayer');
-    const playBtn = document.getElementById('playBtn');
-    const bars = document.querySelectorAll('.bar');
-    let timer;
+    // --- 切换声音 ---
+    function changeVoice(voiceId) {
+        if (voiceId === currentVoiceId) return;
+        
+        // 更新按钮状态
+        currentVoiceId = voiceId;
+        document.querySelectorAll('.voice-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // 切换音频并播放
+        const wasPlaying = !audio.paused;
+        audio.src = `radio_${voiceId}.mp3`;
+        if (wasPlaying) {
+            audio.play();
+        }
+    }
+
+    // --- 播放控制 & 动画 ---
+    function startViz() {
+        vizTimer = setInterval(() => {
+            bars.forEach(b => {
+                // 让波形更有节奏感地跳动
+                const height = Math.random() > 0.8 ? Math.random() * 35 + 5 : Math.random() * 15 + 5;
+                b.style.height = height + 'px';
+            });
+        }, 80);
+    }
+    function stopViz() {
+        clearInterval(vizTimer);
+        bars.forEach(b => b.style.height = '5px');
+    }
 
     playBtn.onclick = () => {
         if (audio.paused) {
-            audio.play().catch(e => alert("请先运行 Python 脚本生成 daily_radio.mp3 文件！"));
-            playBtn.innerText = "II";
-            // 波形动画
-            timer = setInterval(() => {
-                bars.forEach(b => b.style.height = Math.random() * 25 + 5 + 'px');
-            }, 100);
+            audio.play().catch(e => alert("音频文件未找到，请等待下个整点更新！"));
+            playIcon.style.display = 'none';
+            pauseIcon.style.display = 'block';
+            startViz();
         } else {
             audio.pause();
-            playBtn.innerText = "▶";
-            clearInterval(timer);
-            bars.forEach(b => b.style.height = '5px');
+            playIcon.style.display = 'block';
+            pauseIcon.style.display = 'none';
+            stopViz();
         }
     };
 
     audio.onended = () => {
-        playBtn.innerText = "▶";
-        clearInterval(timer);
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+        stopViz();
     };
+    // 切换声音加载时显示加载状态
+    audio.onwaiting = () => stopViz();
+    audio.onplaying = () => startViz();
+
 </script>
 </body>
 </html>
