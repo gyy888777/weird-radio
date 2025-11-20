@@ -1,16 +1,19 @@
-name: Daily Radio Update
+name: Hourly Weird News Update
 
-# 触发条件：每天国际时间 0点 (北京时间早上8点) 运行
+# 触发条件：每小时的第 5 分钟运行一次
+# (cron 语法: 分 时 日 月 周)
+# '5 * * * *' 表示：每个小时的 05 分 (比如 8:05, 9:05...)
+# 为什么不是整点？因为整点 GitHub 服务器很忙，稍微错开几分钟运行更稳定。
 on:
   schedule:
-    - cron: '0 0 * * *'
-  # 允许你手动点按钮测试
+    - cron: '5 * * * *'
+  # 允许手动点击按钮触发
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # 给机器人写文件的权限
+    # 给机器人写文件的权限 (重要!)
     permissions:
       contents: write
 
@@ -19,27 +22,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. 安装 Python 环境
+      # 2. 设置时区为北京时间 (这样 Python 脚本里的时间才对)
+      - name: Set timezone
+        run: sudo timedatectl set-timezone Asia/Shanghai
+
+      # 3. 安装 Python 环境
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
-      # 3. 安装配音软件
+      # 4. 安装依赖
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
 
-      # 4. 运行你的脚本 (生成 MP3)
+      # 5. 运行你的脚本 (生成 3 个 MP3 和 1 个 JSON)
       - name: Run script
         run: python update_news.py
 
-      # 5. 把生成的 MP3 保存回仓库
+      # 6. 把生成的所有文件保存回仓库
       - name: Save changes
         run: |
           git config --global user.name "RadioBot"
           git config --global user.email "bot@example.com"
+          # 添加所有新文件 (包括 radio_yunxi.mp3, radio_xiaoxiao.mp3 等)
           git add .
-          # 如果有新文件就提交，没有就不报错
-          git commit -m "Auto-update: New Radio Show" || exit 0
+          # 提交信息里加上时间
+          git commit -m "Hourly Update: $(date +'%H:%M')" || exit 0
           git push
