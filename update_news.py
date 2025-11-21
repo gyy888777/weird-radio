@@ -4,12 +4,12 @@ import datetime
 import asyncio
 import edge_tts
 
-# --- 1. 新闻抓取 (保持丰富性) ---
+# --- 1. 新闻抓取 (内容保持不变) ---
 def get_tech_news():
     templates = [
-        ("GPT-6发布", "新模型学会了自我编程，效率提升500%，程序员直呼'危'。"),
-        ("马斯克火星计划", "SpaceX星舰将不再需要人类驾驶，首批火星船票已售罄。"),
-        ("苹果透明手机", "iPhone 18采用全玻璃机身，颜值爆表但维修费高达两万。"),
+        ("GPT-6发布", "新模型甚至学会了帮程序员写周报，效率提升500%，引发职场焦虑。"),
+        ("马斯克火星计划", "SpaceX星舰将由AI全自动驾驶，不再需要人类宇航员操作。"),
+        ("苹果发布透明iPhone", "整机采用全玻璃机身，虽然易碎但颜值爆表，黄牛价已炒至3万元。"),
         ("人造太阳突破", "中国核聚变装置运行时间打破纪录，无限能源时代即将来临。")
     ]
     return generate_items(templates, "科技", ["硬核", "未来", "AI"])
@@ -41,54 +41,40 @@ def generate_items(templates, category, tags):
             "tag": random.choice(tags),
             "title": title,
             "summary": detail,
-            "length": len(title) + len(detail) # 用于前端进度计算
+            "length": len(title) + len(detail)
         })
     return items
 
-# --- 2. 极简广播稿 (零废话版) ---
+# --- 2. 极简广播稿 (零废话) ---
 def create_smart_script(all_news, hour_str):
     # 开场只有时间
     intro = f"北京时间{hour_str}点整。"
-    
     full_text = intro
     
     for item in all_news:
-        # 格式：分类 -> 标题 -> 内容 (极简衔接)
-        # 比如：【科技】GPT-6发布。新模型...
-        segment = f"【{item['category']}】{item['title']}。{item['summary']} "
+        # 极简衔接
+        segment = f"{item['title']}。{item['summary']} "
         full_text += segment
-        item['length'] = len(segment) # 更新精确字数
+        item['length'] = len(segment)
 
     outro = "播报结束。"
     full_text += outro
     
     return full_text, len(intro), len(outro)
 
-# --- 3. 音频生成 (超强防封锁版) ---
-VOICES = [
-    {"id": "yunxi", "name": "zh-CN-YunxiNeural"},
-    {"id": "xiaoxiao", "name": "zh-CN-XiaoxiaoNeural"},
-    {"id": "liaoning", "name": "zh-CN-LiaoningNeural"}
-]
-
-async def generate_all_audios(text):
+# --- 3. 音频生成 (单人极速版) ---
+async def generate_audio(text):
     print(f"📝 字数: {len(text)}")
+    filename = "radio_xiaoxiao.mp3" # 固定文件名
+    voice = "zh-CN-XiaoxiaoNeural"  # 只用晓晓
     
-    for voice in VOICES:
-        filename = f"radio_{voice['id']}.mp3"
-        print(f"🎙️ 生成 {voice['id']} ...")
-        
-        for attempt in range(3):
-            try:
-                communicate = edge_tts.Communicate(text, voice["name"])
-                await communicate.save(filename)
-                print(f"   ✅ 成功")
-                # 【关键】休息10秒！确保老铁能出来！
-                await asyncio.sleep(10)
-                break
-            except Exception as e:
-                print(f"   ⚠️ 失败 ({attempt+1}): {e}")
-                await asyncio.sleep(10)
+    print(f"🎙️ 正在生成晓晓的声音...")
+    try:
+        communicate = edge_tts.Communicate(text, voice)
+        await communicate.save(filename)
+        print(f"✅ {filename} 生成成功！")
+    except Exception as e:
+        print(f"❌ 失败: {e}")
 
 # --- 主程序 ---
 if __name__ == "__main__":
@@ -109,15 +95,10 @@ if __name__ == "__main__":
             "total_len": len(full_text),
             "intro_len": intro_len,
             "outro_len": outro_len
-        },
-        "voices": [
-            {"id": "yunxi", "label": "云希"},
-            {"id": "xiaoxiao", "label": "晓晓"},
-            {"id": "liaoning", "label": "东北老铁"}
-        ]
+        }
     }
     
     with open("news_data.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     
-    asyncio.run(generate_all_audios(full_text))
+    asyncio.run(generate_audio(full_text))
