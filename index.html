@@ -3,223 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>天下奇闻 · 整点播报</title>
+    <title>Crypto & Weird FM</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&display=swap');
 
         :root {
+            --bg: #050505;
             --text-main: #fff;
-            --text-sub: rgba(255,255,255,0.6);
-            --accent: #ff4b1f; /* 活力橙红 */
+            --text-sub: rgba(255,255,255,0.5);
+            
+            /* 品牌色 */
+            --binance-yellow: #FCD535; 
+            --crypto-purple: #8C52FF;
+            --tech-blue: #3b82f6;
+            --ent-pink: #ec4899;
+            --weird-orange: #f97316;
         }
 
         body {
-            margin: 0; background: #0f0c29; color: var(--text-main);
-            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0; background: var(--bg); color: var(--text-main);
+            font-family: 'Noto Sans SC', sans-serif;
             height: 100vh; overflow: hidden;
             display: flex; flex-direction: column;
         }
 
-        /* --- 1. 动态流体背景 (年轻化核心) --- */
-        .mesh-bg {
+        /* 动态背景：深邃的区块链暗网风格 */
+        .bg-mesh {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(125deg, #0f0c29, #302b63, #24243e);
-            z-index: -2;
+            background: 
+                radial-gradient(circle at 10% 10%, rgba(252, 213, 53, 0.15), transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(140, 82, 255, 0.15), transparent 40%);
+            z-index: -1;
         }
-        .mesh-blob {
-            position: absolute; filter: blur(80px); opacity: 0.6;
-            animation: float 20s infinite ease-in-out alternate;
-        }
-        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #ff4b1f; animation-delay: -5s; }
-        .blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #1fddff; animation-delay: -2s; }
-        .blob-3 { top: 40%; left: 40%; width: 40vw; height: 40vw; background: #c026d3; animation-delay: -8s; }
-
-        @keyframes float {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(30px, -50px) scale(1.1); }
+        .bg-mesh::after { /* 网格线 */
+            content: ''; position: absolute; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
         }
 
-        /* 全屏遮罩 */
+        /* 开屏遮罩 */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(20px); z-index: 999;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(15px); z-index: 999;
             display: flex; flex-direction: column;
             justify-content: center; align-items: center;
             cursor: pointer; transition: opacity 0.5s;
         }
         .overlay.hidden { opacity: 0; pointer-events: none; }
         .play-circle {
-            width: 80px; height: 80px; border-radius: 50%; background: #fff;
+            width: 90px; height: 90px; border-radius: 50%; background: var(--binance-yellow);
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 30px rgba(255,255,255,0.4); animation: pulse 2s infinite;
+            box-shadow: 0 0 40px rgba(252, 213, 53, 0.4); animation: pulse 2s infinite;
         }
-        .play-circle svg { width: 30px; height: 30px; fill: #000; margin-left: 5px; }
-        @keyframes pulse { 0% {box-shadow: 0 0 0 0 rgba(255,255,255,0.4);} 70% {box-shadow: 0 0 0 20px rgba(255,255,255,0);} 100% {box-shadow: 0 0 0 0 rgba(255,255,255,0);} }
+        .play-circle svg { width: 40px; height: 40px; fill: #000; margin-left: 6px; }
+        @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.05);} 100% {transform: scale(1);} }
 
         /* 顶部 */
         header {
-            padding: 20px 40px; display: flex; align-items: center; justify-content: space-between;
-            z-index: 10;
+            padding: 20px 30px; display: flex; align-items: center; justify-content: space-between;
+            z-index: 10; border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(5,5,5,0.8); backdrop-filter: blur(10px);
         }
-        .brand { font-size: 20px; font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
-        .live-badge { background: #e60000; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+        .brand { font-size: 18px; font-weight: 900; letter-spacing: 1px; display: flex; gap: 10px; align-items: center;}
+        .brand span { color: var(--binance-yellow); }
         .update-time { font-size: 12px; color: var(--text-sub); font-family: monospace; }
 
-        /* 主容器 */
+        /* 布局 */
         .container {
-            flex: 1; display: flex; align-items: center; justify-content: center;
-            max-width: 1200px; margin: 0 auto; width: 100%; gap: 80px; padding: 0 40px;
-            box-sizing: border-box; z-index: 1;
+            flex: 1; display: flex; padding: 30px; gap: 50px; max-width: 1200px; margin: 0 auto; width: 100%;
+            box-sizing: border-box; overflow: hidden;
         }
 
-        /* 左侧：黑胶 */
-        .left-side { flex-shrink: 0; text-align: center; }
-        .disc-wrap {
-            width: 350px; height: 350px; position: relative; 
-            margin-bottom: 30px;
+        /* 左侧：封面 */
+        .left-side { 
+            width: 320px; flex-shrink: 0; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; text-align: center;
         }
-        .disc {
-            width: 100%; height: 100%; border-radius: 50%;
-            background: radial-gradient(#111 0%, #111 30%, #222 31%, #111 32%, #111 40%, #222 41%, #111 42%);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
-            border: 2px solid rgba(255,255,255,0.1);
-            display: flex; align-items: center; justify-content: center;
-            animation: spin 20s linear infinite; animation-play-state: paused;
+        .cover-art {
+            width: 280px; height: 280px; border-radius: 20px;
+            background: linear-gradient(135deg, #222, #111);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            margin-bottom: 30px; transition: 0.5s; position: relative; overflow: hidden;
         }
-        .disc-cover {
-            width: 200px; height: 200px; border-radius: 50%;
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); /* 默认封面色 */
-            display: flex; align-items: center; justify-content: center;
-            color: #000; font-weight: 900; font-size: 24px; border: 5px solid #111;
+        /* 封面的光效 */
+        .cover-art::before {
+            content: ''; position: absolute; width: 150%; height: 150%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1), transparent 60%);
+            top: -25%; left: -25%; opacity: 0.5;
         }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .cover-txt { font-size: 40px; font-weight: 900; position: relative; z-index: 2; }
+        .cover-sub { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 10px; letter-spacing: 2px; position: relative; z-index: 2; }
 
-        /* 右侧：歌词列表 (聚焦模式) */
-        .right-side {
-            flex: 1; height: 50vh; overflow-y: scroll;
-            /* 顶部和底部渐隐遮罩 */
-            mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
-            -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
-            scrollbar-width: none;
+        /* 右侧：列表 */
+        .list-area {
+            flex: 1; overflow-y: auto; height: 100%;
+            mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
+            scrollbar-width: none; padding: 40px 0;
         }
-        .right-side::-webkit-scrollbar { display: none; }
+        .list-area::-webkit-scrollbar { display: none; }
 
-        .news-row {
-            padding: 25px 0; transition: 0.5s; cursor: pointer;
-            opacity: 0.4; transform: scale(0.95); filter: blur(1px); transform-origin: left center;
+        .row {
+            padding: 20px; margin-bottom: 10px; border-radius: 12px;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer; transition: 0.3s; opacity: 0.6; transform: scale(0.98);
         }
-        .news-row:hover { opacity: 0.8; filter: blur(0); }
+        .row:hover { opacity: 0.9; background: rgba(255,255,255,0.08); }
         
-        .news-row.active {
-            opacity: 1; transform: scale(1); filter: blur(0);
-            text-shadow: 0 0 20px rgba(255,255,255,0.3);
+        /* 高亮状态 */
+        .row.active {
+            opacity: 1; transform: scale(1);
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        .tag { font-size: 12px; font-weight: bold; padding: 4px 8px; border-radius: 6px; background: rgba(255,255,255,0.2); margin-right: 10px; vertical-align: middle; }
-        .title { font-size: 22px; font-weight: bold; margin-bottom: 8px; line-height: 1.3; }
-        .desc { font-size: 15px; color: rgba(255,255,255,0.8); line-height: 1.6; font-weight: 400; }
+        /* Alpha 特效卡片 */
+        .row[data-cat="Alpha"] {
+            border-left: 4px solid var(--binance-yellow);
+        }
+        .row[data-cat="Alpha"].active {
+            background: linear-gradient(90deg, rgba(252, 213, 53, 0.1), transparent);
+            box-shadow: 0 0 30px rgba(252, 213, 53, 0.1);
+        }
 
-        /* 底部悬浮岛 */
+        /* 币圈卡片 */
+        .row[data-cat="币圈"] { border-left: 4px solid var(--crypto-purple); }
+
+        .row-header { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
+        .tag { 
+            font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: bold; 
+            background: rgba(255,255,255,0.1); color: #aaa;
+        }
+        /* 标签配色 */
+        .row[data-cat="Alpha"] .tag { background: var(--binance-yellow); color: #000; }
+        .row[data-cat="币圈"] .tag { background: var(--crypto-purple); color: #fff; }
+
+        .row-title { font-size: 18px; font-weight: bold; color: #fff; line-height: 1.4; }
+        .row-desc { font-size: 14px; color: #999; margin-top: 6px; line-height: 1.5; }
+
+        /* 底部 */
         .dock {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 500px; height: 70px;
-            background: rgba(255,255,255,0.1); backdrop-filter: blur(30px);
-            border: 1px solid rgba(255,255,255,0.2); border-radius: 40px;
-            display: flex; align-items: center; padding: 0 20px; gap: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3); z-index: 100;
+            width: 90%; max-width: 600px; height: 70px;
+            background: rgba(20,20,20,0.8); backdrop-filter: blur(30px);
+            border-radius: 40px; border: 1px solid rgba(255,255,255,0.15);
+            display: flex; align-items: center; padding: 0 20px; gap: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); z-index: 100;
         }
 
-        .play-btn {
-            width: 45px; height: 45px; border-radius: 50%; background: #fff;
-            border: none; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; flex-shrink: 0; transition: 0.2s;
+        .btns { display: flex; align-items: center; gap: 15px; }
+        .c-btn { background: none; border: none; color: #fff; cursor: pointer; padding: 0; transition: 0.2s; }
+        .c-btn:hover { color: var(--binance-yellow); }
+        .play-circle-sm {
+            width: 45px; height: 45px; border-radius: 50%; background: #fff; color: #000;
+            display: flex; justify-content: center; align-items: center; font-size: 20px;
         }
-        .play-btn:active { transform: scale(0.9); }
-        .play-btn svg { width: 18px; height: 18px; fill: #000; }
+        
+        .progress { flex: 1; height: 4px; background: #333; border-radius: 2px; position: relative; overflow: hidden; }
+        .fill { height: 100%; width: 0%; background: var(--binance-yellow); }
+        
+        /* 声音切换 */
+        .voice-box { display: flex; gap: 5px; }
+        .v-tag { 
+            font-size: 10px; padding: 4px 8px; border-radius: 10px; 
+            background: #333; color: #888; cursor: pointer; border: 1px solid #444;
+        }
+        .v-tag.active { background: var(--text-main); color: #000; font-weight: bold; border-color: #fff; }
 
-        .progress-area { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 5px; }
-        .progress-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; }
-        .progress-fill { width: 0%; height: 100%; background: #fff; transition: width 0.1s linear; }
-        .time-info { font-size: 10px; color: rgba(255,255,255,0.6); font-family: monospace; display: flex; justify-content: space-between; }
-
-        /* 移动端适配 */
         @media (max-width: 768px) {
-            .container { flex-direction: column; gap: 30px; padding: 20px; }
-            .disc-wrap { width: 200px; height: 200px; margin-bottom: 10px; }
-            .disc-cover { width: 120px; height: 120px; font-size: 16px; }
-            .right-side { width: 100%; height: 40vh; mask-image: none; }
-            .news-row { padding: 15px 0; opacity: 1; filter: blur(0); transform: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
-            .news-row.active { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; }
-            .title { font-size: 18px; }
+            .container { flex-direction: column; padding: 20px; gap: 20px; }
+            .left-side { display: none; } /* 手机端隐藏大封面，专注列表 */
+            .list-area { padding: 20px 0; }
         }
     </style>
 </head>
 <body>
 
-<div class="mesh-bg">
-    <div class="mesh-blob blob-1"></div>
-    <div class="mesh-blob blob-2"></div>
-    <div class="mesh-blob blob-3"></div>
-</div>
+<div class="bg-mesh"></div>
 
 <div class="overlay" id="overlay" onclick="startApp()">
-    <div class="play-circle">
-        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-    </div>
-    <div style="margin-top: 20px; font-size: 18px; font-weight: bold;">点击开启今日奇闻</div>
+    <div class="play-circle"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+    <div style="margin-top: 20px; font-size: 16px; color: #ccc;">点击查看今日 Alpha</div>
 </div>
 
 <header>
-    <div class="brand">
-        <span class="live-badge">LIVE</span> 天下奇闻 · 整点播报
-    </div>
-    <div class="update-time" id="timeStr">--:-- 更新</div>
+    <div class="brand"><span>Crypto</span> & Weird FM</div>
+    <div class="update-time" id="headerTime">--:--</div>
 </header>
 
 <div class="container">
     <div class="left-side">
-        <div class="disc-wrap">
-            <div class="disc" id="disc">
-                <div class="disc-cover" id="coverArt">NEWS</div>
-            </div>
+        <div class="cover-art" id="coverArt">
+            <div class="cover-txt" id="coverTxt">NEWS</div>
+            <div class="cover-sub">Daily Briefing</div>
         </div>
-        <h2 id="currentCategory" style="margin:0; font-size:24px; text-shadow:0 0 20px rgba(255,255,255,0.3);">整点新闻</h2>
+        <div class="voice-box" id="voiceBox"></div>
     </div>
 
-    <div class="right-side" id="newsList"></div>
+    <div class="list-area" id="newsList"></div>
 </div>
 
 <div class="dock">
-    <button class="play-btn" id="playBtn">
-        <svg id="iconPlay" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        <svg id="iconPause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-    </button>
-    <div class="progress-area">
-        <div class="time-info"><span id="currTime">00:00</span><span id="totalTime">00:00</span></div>
-        <div class="progress-bg"><div class="progress-fill" id="progFill"></div></div>
+    <div class="btns">
+        <button class="c-btn play-circle-sm" id="playBtn">▶</button>
     </div>
+    <div class="progress"><div class="fill" id="progFill"></div></div>
+    <div style="font-size: 12px; font-family: monospace; color: #666;" id="timeStr">00:00</div>
 </div>
 
 <audio id="audio"></audio>
 
 <script>
     const audio = document.getElementById('audio');
-    const playBtn = document.getElementById('playBtn');
-    const disc = document.getElementById('disc');
-    const coverArt = document.getElementById('coverArt');
-    const currentCategory = document.getElementById('currentCategory');
+    const ts = new Date().getTime();
     
+    // 颜色配置
+    const colors = {
+        'Alpha': '#FCD535',
+        '币圈': '#8C52FF',
+        '科技': '#3b82f6',
+        '娱乐': '#ec4899',
+        '奇闻': '#f97316',
+        'default': '#ffffff'
+    };
+
     let newsData = [];
     let metaData = {};
-    const ts = new Date().getTime();
-
-    // 潮流配色 (对应 科技/娱乐/奇闻)
-    const catColors = {
-        '科技': 'linear-gradient(135deg, #3b82f6, #2dd4bf)',
-        '娱乐': 'linear-gradient(135deg, #ec4899, #8b5cf6)',
-        '奇闻': 'linear-gradient(135deg, #f59e0b, #ef4444)',
-        'default': 'linear-gradient(135deg, #ffffff, #999999)'
-    };
+    let currentVoice = 'yunxi';
 
     // 1. 加载数据
     fetch(`news_data.json?t=${ts}`)
@@ -227,86 +240,95 @@
         .then(data => {
             newsData = data.news;
             metaData = data.meta;
-            document.getElementById('timeStr').innerText = `${data.date} ${data.hour}:00`;
-            
+            document.getElementById('headerTime').innerText = `${data.hour}:00 Update`;
+
+            // 渲染声音
+            const vb = document.getElementById('voiceBox');
+            data.voices.forEach(v => {
+                let btn = document.createElement('div');
+                btn.className = `v-tag ${v.id===currentVoice?'active':''}`;
+                btn.innerText = v.label.split('·')[0];
+                btn.onclick = () => changeVoice(v.id, btn);
+                vb.appendChild(btn);
+            });
+
             // 渲染列表
-            renderList();
-            
-            // 预加载晓晓音频
-            audio.src = `radio_xiaoxiao.mp3?v=${ts}`;
+            const list = document.getElementById('newsList');
+            list.innerHTML = `<div class="row active" id="row-intro">
+                <div class="row-title">👋 欢迎回来</div>
+                <div class="row-desc">正在为您加载今日最新的 Crypto & 奇闻资讯...</div>
+            </div>`;
+
+            data.news.forEach((item, i) => {
+                list.innerHTML += `
+                    <div class="row" id="row-${i}" data-cat="${item.category}" onclick="seekTo(${i})">
+                        <div class="row-header">
+                            <span class="tag">${item.category}</span>
+                        </div>
+                        <div class="row-title">${item.title}</div>
+                        <div class="row-desc">${item.summary}</div>
+                    </div>
+                `;
+            });
+            // 底部留白
+            list.innerHTML += `<div style="height:150px"></div>`;
+
+            audio.src = `radio_${currentVoice}.mp3?v=${ts}`;
         });
 
-    function renderList() {
-        const list = document.getElementById('newsList');
-        list.innerHTML = `<div class="news-row active" id="row-intro">
-            <div class="title">👋 欢迎收听</div>
-            <div class="desc">天下奇闻 · 整点播报即将开始...</div>
-        </div>`;
-
-        newsData.forEach((item, i) => {
-            list.innerHTML += `
-                <div class="news-row" id="row-${i}" onclick="seekTo(${i})">
-                    <div><span class="tag">${item.category}</span></div>
-                    <div class="title">${item.title}</div>
-                    <div class="desc">${item.summary}</div>
-                </div>
-            `;
-        });
-        list.innerHTML += `<div style="height:200px"></div>`;
-    }
-
-    // 2. 启动与播放
+    // 2. 核心逻辑
     function startApp() {
-        document.getElementById('overlay').classList.add('hidden');
-        audio.play().then(() => {
-            disc.style.animationPlayState = 'running';
-            updatePlayIcon(true);
-        }).catch(e => alert("音频加载中，请稍后再试"));
+        document.getElementById('overlay').style.opacity = 0;
+        setTimeout(() => document.getElementById('overlay').style.display = 'none', 500);
+        audio.play().then(updatePlayBtn(true)).catch(e => alert("音频加载中..."));
     }
 
-    playBtn.onclick = () => {
+    function changeVoice(id, btn) {
+        if(id===currentVoice) return;
+        currentVoice = id;
+        document.querySelectorAll('.v-tag').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        let playing = !audio.paused;
+        audio.src = `radio_${id}.mp3?v=${new Date().getTime()}`;
+        if(playing) audio.play();
+    }
+
+    // 3. 播放控制
+    document.getElementById('playBtn').onclick = () => {
         if(audio.paused) {
             audio.play();
-            disc.style.animationPlayState = 'running';
-            updatePlayIcon(true);
+            updatePlayBtn(true);
         } else {
             audio.pause();
-            disc.style.animationPlayState = 'paused';
-            updatePlayIcon(false);
+            updatePlayBtn(false);
         }
     };
 
-    function updatePlayIcon(isPlaying) {
-        document.getElementById('iconPlay').style.display = isPlaying ? 'none' : 'block';
-        document.getElementById('iconPause').style.display = isPlaying ? 'block' : 'none';
+    function updatePlayBtn(isPlaying) {
+        document.getElementById('playBtn').innerText = isPlaying ? "II" : "▶";
     }
 
-    // 3. 核心同步与高亮
+    // 4. 同步高亮 (字数算法)
     audio.ontimeupdate = () => {
         if(!audio.duration) return;
         
-        // 进度条
         const pct = audio.currentTime / audio.duration;
-        document.getElementById('progFill').style.width = (pct * 100) + '%';
-        document.getElementById('currTime').innerText = fmt(audio.currentTime);
-        document.getElementById('totalTime').innerText = fmt(audio.duration);
+        document.getElementById('progFill').style.width = (pct*100) + '%';
+        document.getElementById('timeStr').innerText = 
+            `${Math.floor(audio.currentTime/60)}:${Math.floor(audio.currentTime%60).toString().padStart(2,'0')}`;
 
-        // 字数估算高亮
         const totalLen = metaData.total_len;
-        const currentLen = pct * totalLen;
+        const curLen = pct * totalLen;
         
         let activeIdx = -1;
         let count = metaData.intro_len;
 
-        if (currentLen < count) {
-            activeIdx = -1; 
-        } else {
-            for (let i = 0; i < newsData.length; i++) {
+        if(curLen < count) activeIdx = -1;
+        else {
+            for(let i=0; i<newsData.length; i++) {
                 count += newsData[i].length;
-                if (currentLen < count) {
-                    activeIdx = i;
-                    break;
-                }
+                if(curLen < count) { activeIdx = i; break; }
             }
         }
         
@@ -318,34 +340,27 @@
         if(idx === lastIdx) return;
         lastIdx = idx;
 
-        document.querySelectorAll('.news-row').forEach(el => el.classList.remove('active'));
-        const target = document.getElementById(idx === -1 ? 'row-intro' : `row-${idx}`);
+        document.querySelectorAll('.row').forEach(r => r.classList.remove('active'));
+        let target = document.getElementById(idx === -1 ? 'row-intro' : `row-${idx}`);
         
         if(target) {
             target.classList.add('active');
             target.scrollIntoView({behavior: "smooth", block: "center"});
             
-            // 更新左侧封面
+            // 封面变色
             if(idx >= 0) {
-                const cat = newsData[idx].category;
-                coverArt.style.background = catColors[cat];
-                coverArt.innerText = cat;
-                currentCategory.innerText = cat + " NEWS";
-                // 改变光斑颜色 (可选高级效果)
-                document.querySelector('.blob-1').style.background = cat === '科技' ? '#3b82f6' : (cat === '娱乐' ? '#ec4899' : '#f59e0b');
+                let cat = newsData[idx].category;
+                let c = colors[cat] || colors['default'];
+                document.getElementById('coverArt').style.borderColor = c;
+                document.getElementById('coverTxt').style.color = c;
+                document.getElementById('coverTxt').innerText = cat;
             } else {
-                coverArt.style.background = catColors['default'];
-                coverArt.innerText = "NEWS";
-                currentCategory.innerText = "整点播报";
+                document.getElementById('coverTxt').innerText = "NEWS";
+                document.getElementById('coverTxt').style.color = "#fff";
             }
         }
     }
 
-    function fmt(s) {
-        return `${Math.floor(s/60)}:${Math.floor(s%60).toString().padStart(2,'0')}`;
-    }
-
-    // 简易跳转
     function seekTo(idx) {
         const per = audio.duration / (newsData.length + 1);
         audio.currentTime = (idx + 1) * per;
