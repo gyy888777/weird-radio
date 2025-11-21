@@ -1,13 +1,7 @@
-name: Hourly Weird News Update
+name: Crypto News Update
 
 on:
   schedule:
-    - cron: name: Crypto News Update (30min)
-
-on:
-  schedule:
-    # 分 时 日 月 周
-    # */30 表示每 30 分钟运行一次
     - cron: '*/30 * * * *'
   workflow_dispatch:
 
@@ -41,46 +35,6 @@ jobs:
           git config --global user.name "RadioBot"
           git config --global user.email "bot@example.com"
           git add .
-          # 提交信息带上时间
-          git commit -m "Update: $(date +'%H:%M')" || exit 0
-          git pull --rebase origin main
-          git push origin main
-          
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set timezone
-        run: sudo timedatectl set-timezone Asia/Shanghai
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-
-      - name: Run script
-        run: python update_news.py
-
-      - name: Save changes
-        run: |
-          git config --global user.name "RadioBot"
-          git config --global user.email "bot@example.com"
-          git add .
-          git commit -m "Hourly Update: $(date +'%H:%M')" || exit 0
-          
-          # --- 关键修复在这里 ---
-          # 先把你在网页上改的拉下来，合并，然后再推上去
+          git commit -m "Update News" || exit 0
           git pull --rebase origin main
           git push origin main
