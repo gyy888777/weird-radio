@@ -21,7 +21,6 @@
             display: flex; flex-direction: column;
         }
 
-        /* 优雅的背景流光 */
         .bg-flow {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at 50% -10%, #2b1d3d, #050505 70%);
@@ -33,7 +32,7 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            cursor: pointer; transition: opacity 0.6s ease-out;
+            cursor: pointer; transition: opacity 0.6s;
         }
         .start-btn {
             width: 90px; height: 90px; border-radius: 50%;
@@ -44,22 +43,19 @@
         }
         @keyframes breathe { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.05);opacity:0.8} }
 
-        /* 头部 */
         header {
             padding: 25px 40px; display: flex; justify-content: space-between; align-items: center;
             z-index: 10;
         }
-        .logo { font-size: 20px; font-weight: 900; letter-spacing: 2px; color: #fff; }
+        .logo { font-size: 20px; font-weight: 900; letter-spacing: 2px; }
         .logo span { color: var(--accent); }
         .time-tag { font-family: monospace; color: #666; font-size: 12px; }
 
-        /* 主体 */
         .container {
             flex: 1; display: flex; align-items: center; justify-content: center;
             gap: 80px; padding: 0 60px; max-width: 1100px; margin: 0 auto; width: 100%; box-sizing: border-box;
         }
 
-        /* 左侧黑胶 (优雅版) */
         .vinyl-wrap {
             width: 360px; height: 360px; position: relative; flex-shrink: 0;
             display: flex; justify-content: center; align-items: center;
@@ -79,7 +75,6 @@
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* 右侧列表 */
         .list {
             flex: 1; height: 55vh; overflow-y: auto;
             mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
@@ -89,31 +84,28 @@
 
         .row {
             padding: 22px 0; margin-bottom: 8px; border-radius: 12px;
-            transition: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); cursor: pointer; 
+            transition: 0.4s; cursor: pointer; 
             opacity: 0.4; transform: scale(0.98) translateX(0); filter: blur(1.5px);
         }
         .row.active {
             opacity: 1; transform: scale(1) translateX(10px); filter: blur(0);
         }
 
-        /* 动态配色 */
+        /* 配色 */
         .row[data-cat="Alpha"] { border-left: 3px solid var(--alpha); }
         .row[data-cat="Alpha"] .title { color: var(--alpha); }
-        
         .row[data-cat="币圈"] { border-left: 3px solid #a78bfa; }
-        .row[data-cat="趣闻"] { border-left: 3px solid #f472b6; }
 
         .tag { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #222; color: #aaa; margin-bottom: 8px; display: inline-block; border: 1px solid #333;}
         .title { font-size: 18px; font-weight: bold; line-height: 1.4; margin-bottom: 6px; }
         .desc { font-size: 14px; color: #888; line-height: 1.6; font-weight: 300; }
 
-        /* 底部控制 */
+        /* 底部 */
         .bar {
             height: 90px; display: flex; justify-content: center; align-items: center;
             background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
             z-index: 10; pointer-events: none;
         }
-        /* 一个极简的播放指示器 */
         .play-status {
             font-size: 12px; color: #666; letter-spacing: 2px; text-transform: uppercase;
             display: flex; align-items: center; gap: 10px;
@@ -131,7 +123,7 @@
 
 <div class="start-screen" id="startScreen" onclick="initAudio()">
     <div class="start-btn">▶</div>
-    <div style="margin-top:20px; color:#aaa; font-size:14px;">开启 · 志玲语音包</div>
+    <div style="margin-top:20px; color:#aaa; font-size:14px;">点击收听 · 志玲语音包</div>
 </div>
 
 <header>
@@ -173,15 +165,15 @@
             metaData = data.meta;
             document.getElementById('timeStr').innerText = `${data.date} ${data.hour}:00`;
             renderList();
-            // 预加载
-            audio.src = `radio.mp3?v=${ts}`;
+            // 默认加载志玲
+            audio.src = `radio_tw.mp3?v=${ts}`;
         })
         .catch(err => console.log("等待更新..."));
 
     function renderList() {
         const list = document.getElementById('newsList');
-        // 开场白占位
-        list.innerHTML = `<div class="row active" id="row-intro"><div class="title">🎙️ 欢迎回来</div><div class="desc">正在接入 Web3 信号...</div></div>`;
+        // 开场白
+        list.innerHTML = `<div class="row active" id="row-intro"><div class="title">🎙️ 欢迎回来</div><div class="desc">北京时间整点播报</div></div>`;
         
         newsData.forEach((item, i) => {
             list.innerHTML += `
@@ -207,14 +199,15 @@
         }).catch(e => alert("音频加载中..."));
     }
 
-    // 3. 同步高亮
+    // 3. 高亮逻辑
     audio.ontimeupdate = () => {
         if(!audio.duration) return;
         const pct = audio.currentTime / audio.duration;
-        const curLen = pct * metaData.total_len;
         
+        // 根据字数简单估算进度
+        const curLen = pct * metaData.total_len;
         let activeIdx = -1;
-        let count = metaData.intro_len || 15; // 增加一点开场白缓冲字数
+        let count = metaData.intro_len || 10;
 
         if(curLen > count) {
             for(let i=0; i<newsData.length; i++) {
@@ -243,14 +236,13 @@
                 document.getElementById('cover').innerText = "ALPHA";
                 document.getElementById('cover').style.color = "#000";
             } else if (idx >= 0) {
-                document.getElementById('cover').style.background = '#2b1d3d'; // 紫
+                document.getElementById('cover').style.background = '#D4AF37'; // 金
                 document.getElementById('cover').innerText = "NEWS";
-                document.getElementById('cover').style.color = "#fff";
+                document.getElementById('cover').style.color = "#000";
             }
         }
     }
     
-    // 播放结束
     audio.onended = () => {
         vinyl.style.animationPlayState = 'paused';
         document.getElementById('status').style.opacity = 0;
