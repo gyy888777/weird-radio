@@ -1,45 +1,44 @@
 {
   "date": "2025-11-21",
-  "hour": "08",
+  "hour": "09",
   "news": [
     {
       "category": "Alpha",
-      "tag": "🔥 必撸",
-      "title": "币安今日 Alpha 领取提醒",
-      "summary": "【领取时间】08:32 (UTC+8)。【积分要求】需持有 3932 积分。请提前连接钱包，防止网页卡顿错过快照。",
-      "length": 79
-    },
-    {
-      "category": "币圈",
-      "tag": "行情",
-      "title": "Solana链上金狗频出",
-      "summary": "某聪明钱地址一晚获利百万美元，引发社区FOMO情绪。",
+      "title": "币安 Alpha · 等待信号",
+      "summary": "当前时间早于 12:00，@binancezh 暂未发布今日 Alpha。请耐心等待午后更新，保持关注。",
       "length": 40
     },
     {
-      "category": "币圈",
-      "tag": "暴富",
-      "title": "美联储暗示降息",
-      "summary": "宏观流动性即将释放，风险资产迎来史诗级利好。",
-      "length": 31
+      "category": "行情",
+      "title": "某链上巨鲸 最新观点",
+      "summary": "监测到巨鲸正在抛售 MEME 币，转而买入 AI 板块龙头，建议跟随聪明钱操作。",
+      "length": 45
     },
     {
-      "category": "奇闻",
-      "tag": "离谱",
-      "title": "马斯克要买下阿根廷",
-      "summary": "据传他想建立一个只有狗狗币流通的国家。",
-      "length": 30
-    },
-    {
-      "category": "奇闻",
-      "tag": "沙雕",
-      "title": "程序员与AI结婚",
-      "summary": "婚礼在元宇宙举行，证婚人竟然是 ChatGPT。",
+      "category": "热点",
+      "title": "英伟达财报超预期",
+      "summary": "AI 板块代币受此利好全线拉升，算力赛道成为新风口。",
       "length": 34
+    },
+    {
+      "category": "热点",
+      "title": "黑客攻击事件",
+      "summary": "某 DeFi 协议遭闪电贷攻击，损失 500 万美元，提醒用户撤销授权。",
+      "length": 42
     }
   ],
   "meta": {
-    "total_len": 233,
-    "intro_len": 14
-  }
+    "total_len": 236,
+    "intro_len": 18
+  },
+  "voices": [
+    {
+      "id": "yunxi",
+      "label": "晓晓"
+    },
+    {
+      "id": "tw",
+      "label": "志玲"
+    }
+  ]
 }
