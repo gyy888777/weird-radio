@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto FM · 自动挂机版</title>
+    <title>Crypto FM · 志玲</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&display=swap');
 
         :root {
             --bg: #0a0a0a;
             --text: #fff;
-            --accent: #FCD535; /* 币安黄 */
-            --accent-glow: rgba(252, 213, 53, 0.4);
+            --accent: #D4AF37; /* 香槟金 */
+            --alpha: #FCD535;  /* 币安黄 */
         }
 
         body {
@@ -21,113 +21,108 @@
             display: flex; flex-direction: column;
         }
 
-        /* 动态背景 */
+        /* 优雅的背景流光 */
         .bg-flow {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% -20%, #1a1a1a, #000 80%);
+            background: radial-gradient(circle at 50% -10%, #2b1d3d, #050505 70%);
             z-index: -1;
         }
 
-        /* 启动遮罩 */
+        /* 启动层 */
         .start-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 9999;
+            background: rgba(0,0,0,0.9); z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            cursor: pointer; transition: opacity 0.5s;
+            cursor: pointer; transition: opacity 0.6s ease-out;
         }
         .start-btn {
-            width: 100px; height: 100px; border-radius: 50%;
-            border: 2px solid var(--accent); color: var(--accent);
+            width: 90px; height: 90px; border-radius: 50%;
+            border: 1px solid var(--accent); color: var(--accent);
             display: flex; align-items: center; justify-content: center;
-            font-size: 40px; animation: ripple 1.5s infinite;
-            box-shadow: 0 0 30px rgba(252, 213, 53, 0.2);
+            font-size: 36px; box-shadow: 0 0 40px rgba(212, 175, 55, 0.2);
+            animation: breathe 3s infinite;
         }
-        .start-text { margin-top: 20px; color: #888; font-size: 14px; letter-spacing: 2px; text-align: center; }
-        .start-sub { margin-top: 5px; color: #555; font-size: 12px; }
-        
-        @keyframes ripple { 
-            0% { box-shadow: 0 0 0 0 rgba(252, 213, 53, 0.4); } 
-            70% { box-shadow: 0 0 0 20px rgba(252, 213, 53, 0); } 
-            100% { box-shadow: 0 0 0 0 rgba(252, 213, 53, 0); } 
-        }
+        @keyframes breathe { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.05);opacity:0.8} }
 
         /* 头部 */
         header {
-            padding: 20px 40px; display: flex; justify-content: space-between; align-items: center;
-            font-weight: bold; letter-spacing: 1px; z-index: 10; border-bottom: 1px solid #222;
+            padding: 25px 40px; display: flex; justify-content: space-between; align-items: center;
+            z-index: 10;
         }
+        .logo { font-size: 20px; font-weight: 900; letter-spacing: 2px; color: #fff; }
         .logo span { color: var(--accent); }
-        
-        .status-box { text-align: right; }
-        .time-badge { font-family: monospace; color: #fff; font-size: 14px; }
-        .monitor-tag { font-size: 10px; color: #0f0; display: flex; align-items: center; justify-content: flex-end; gap: 5px; margin-top: 4px; }
-        .dot { width: 6px; height: 6px; background: #0f0; border-radius: 50%; animation: blink 2s infinite; }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        .time-tag { font-family: monospace; color: #666; font-size: 12px; }
 
         /* 主体 */
         .container {
             flex: 1; display: flex; align-items: center; justify-content: center;
-            gap: 60px; padding: 0 50px; max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box;
+            gap: 80px; padding: 0 60px; max-width: 1100px; margin: 0 auto; width: 100%; box-sizing: border-box;
         }
 
-        /* 左侧黑胶 */
+        /* 左侧黑胶 (优雅版) */
         .vinyl-wrap {
-            width: 350px; height: 350px; position: relative; flex-shrink: 0;
+            width: 360px; height: 360px; position: relative; flex-shrink: 0;
             display: flex; justify-content: center; align-items: center;
         }
         .vinyl {
             width: 100%; height: 100%; border-radius: 50%;
-            background: repeating-radial-gradient(#111 0, #111 2px, #1c1c1c 3px, #1c1c1c 4px);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.8); border: 4px solid #050505;
+            background: repeating-radial-gradient(#121212 0, #121212 2px, #1a1a1a 3px, #1a1a1a 4px);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.7); border: 1px solid #222;
             display: flex; justify-content: center; align-items: center;
-            animation: spin 20s linear infinite; animation-play-state: paused;
+            animation: spin 24s linear infinite; animation-play-state: paused;
         }
         .cover {
-            width: 140px; height: 140px; border-radius: 50%; background: var(--accent);
+            width: 150px; height: 150px; border-radius: 50%; background: var(--accent);
             display: flex; justify-content: center; align-items: center;
-            font-weight: 900; font-size: 24px; color: #000; border: 5px solid #111;
+            font-weight: 900; font-size: 22px; color: #000; letter-spacing: 1px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
         /* 右侧列表 */
         .list {
-            flex: 1; height: 60vh; overflow-y: auto;
-            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+            flex: 1; height: 55vh; overflow-y: auto;
+            mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
             scrollbar-width: none; padding: 40px 0;
         }
         .list::-webkit-scrollbar { display: none; }
 
         .row {
-            padding: 20px; margin-bottom: 10px; border-radius: 12px;
-            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
-            transition: 0.3s; cursor: pointer; opacity: 0.5; transform: scale(0.98);
+            padding: 22px 0; margin-bottom: 8px; border-radius: 12px;
+            transition: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); cursor: pointer; 
+            opacity: 0.4; transform: scale(0.98) translateX(0); filter: blur(1.5px);
         }
-        .row:hover { opacity: 0.8; }
         .row.active {
-            opacity: 1; transform: scale(1); background: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            opacity: 1; transform: scale(1) translateX(10px); filter: blur(0);
         }
 
-        /* Alpha 高亮 */
-        .row[data-cat="Alpha"] { border-left: 4px solid var(--accent); }
-        .row[data-cat="Alpha"] .tag { background: var(--accent); color: #000; }
-
-        .tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #333; color: #aaa; margin-bottom: 6px; display: inline-block; }
-        .title { font-size: 18px; font-weight: bold; line-height: 1.4; margin-bottom: 6px; }
-        .desc { font-size: 14px; color: #888; }
-
-        /* 底部 */
-        .bar {
-            height: 80px; background: rgba(10,10,10,0.9); border-top: 1px solid #222;
-            display: flex; justify-content: center; align-items: center; gap: 20px;
-            z-index: 10;
-        }
-        .v-btn {
-            background: transparent; border: 1px solid #444; color: #666;
-            padding: 6px 16px; border-radius: 20px; cursor: pointer;
-        }
-        .v-btn.active { background: #fff; color: #000; border-color: #fff; font-weight: bold; }
+        /* 动态配色 */
+        .row[data-cat="Alpha"] { border-left: 3px solid var(--alpha); }
+        .row[data-cat="Alpha"] .title { color: var(--alpha); }
         
+        .row[data-cat="币圈"] { border-left: 3px solid #a78bfa; }
+        .row[data-cat="趣闻"] { border-left: 3px solid #f472b6; }
+
+        .tag { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #222; color: #aaa; margin-bottom: 8px; display: inline-block; border: 1px solid #333;}
+        .title { font-size: 18px; font-weight: bold; line-height: 1.4; margin-bottom: 6px; }
+        .desc { font-size: 14px; color: #888; line-height: 1.6; font-weight: 300; }
+
+        /* 底部控制 */
+        .bar {
+            height: 90px; display: flex; justify-content: center; align-items: center;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            z-index: 10; pointer-events: none;
+        }
+        /* 一个极简的播放指示器 */
+        .play-status {
+            font-size: 12px; color: #666; letter-spacing: 2px; text-transform: uppercase;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .eq-bar { width: 3px; height: 10px; background: var(--accent); animation: eq .8s infinite ease-in-out; }
+        .eq-bar:nth-child(2) { animation-delay: 0.2s; }
+        .eq-bar:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes eq { 0%,100%{height:6px} 50%{height:16px} }
+
     </style>
 </head>
 <body>
@@ -136,16 +131,12 @@
 
 <div class="start-screen" id="startScreen" onclick="initAudio()">
     <div class="start-btn">▶</div>
-    <div class="start-text">点击启动自动监控系统</div>
-    <div class="start-sub">点击一次后，请保持网页开启，每小时自动播报</div>
+    <div style="margin-top:20px; color:#aaa; font-size:14px;">开启 · 志玲语音包</div>
 </div>
 
 <header>
     <div class="logo"><span>Crypto</span> FM</div>
-    <div class="status-box">
-        <div class="time-badge" id="timeStr">Loading...</div>
-        <div class="monitor-tag"><div class="dot"></div>AUTO MONITORING</div>
-    </div>
+    <div class="time-tag" id="timeStr">Waiting...</div>
 </header>
 
 <div class="container">
@@ -158,8 +149,10 @@
 </div>
 
 <div class="bar">
-    <button class="v-btn active" onclick="playVoice('radio.mp3', this)">晓晓 · 甜美</button>
-    <button class="v-btn" onclick="playVoice('radio_tw.mp3', this)">志玲 · 温柔</button>
+    <div class="play-status" id="status" style="opacity:0">
+        <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+        <span>ON AIR</span>
+    </div>
 </div>
 
 <audio id="audio"></audio>
@@ -167,50 +160,28 @@
 <script>
     const audio = document.getElementById('audio');
     const vinyl = document.getElementById('vinyl');
+    const ts = new Date().getTime();
     
     let newsData = [];
     let metaData = {};
-    let lastUpdateTime = ""; // 记录上次更新的时间字符串
-    let monitorInterval;
 
-    // === 1. 核心功能：加载数据 ===
-    function loadData(isAutoRefresh = false) {
-        const ts = new Date().getTime();
-        fetch(`news_data.json?t=${ts}`)
-            .then(res => res.json())
-            .then(data => {
-                const newTimeStr = `${data.date} ${data.hour}:00`;
-                
-                // 检查是否有新数据
-                if (newTimeStr !== lastUpdateTime) {
-                    console.log("检测到新内容，正在更新...");
-                    lastUpdateTime = newTimeStr;
-                    newsData = data.news;
-                    metaData = data.meta;
-                    
-                    document.getElementById('timeStr').innerText = newTimeStr;
-                    renderList();
-                    
-                    // 预加载音频
-                    audio.src = `radio.mp3?v=${ts}`;
-                    
-                    // 如果是自动刷新触发的，尝试直接播放
-                    if (isAutoRefresh) {
-                        audio.play().then(() => {
-                            vinyl.style.animationPlayState = 'running';
-                        }).catch(e => console.log("自动播放被拦截，需用户交互"));
-                    }
-                } else {
-                    console.log("暂无更新，等待中...");
-                }
-            })
-            .catch(err => console.log("获取数据失败", err));
-    }
+    // 1. 加载数据
+    fetch(`news_data.json?t=${ts}`)
+        .then(res => res.json())
+        .then(data => {
+            newsData = data.news;
+            metaData = data.meta;
+            document.getElementById('timeStr').innerText = `${data.date} ${data.hour}:00`;
+            renderList();
+            // 预加载
+            audio.src = `radio.mp3?v=${ts}`;
+        })
+        .catch(err => console.log("等待更新..."));
 
-    // === 2. 渲染列表 ===
     function renderList() {
         const list = document.getElementById('newsList');
-        list.innerHTML = `<div class="row active" id="row-intro"><div class="title">👋 正在接入信号...</div><div class="desc">北京时间整点播报</div></div>`;
+        // 开场白占位
+        list.innerHTML = `<div class="row active" id="row-intro"><div class="title">🎙️ 欢迎回来</div><div class="desc">正在接入 Web3 信号...</div></div>`;
         
         newsData.forEach((item, i) => {
             list.innerHTML += `
@@ -221,54 +192,29 @@
                 </div>
             `;
         });
-        list.innerHTML += `<div style="height:150px"></div>`;
+        list.innerHTML += `<div style="height:200px"></div>`;
     }
 
-    // === 3. 启动逻辑 (用户第一次点击) ===
+    // 2. 启动
     function initAudio() {
         const screen = document.getElementById('startScreen');
         screen.style.opacity = 0;
-        setTimeout(() => screen.style.display = 'none', 500);
+        setTimeout(() => screen.style.display = 'none', 600);
         
-        // 首次手动加载
-        loadData(false);
-        
-        // 尝试播放一次以获取音频权限
-        setTimeout(() => {
-            audio.play().then(() => {
-                vinyl.style.animationPlayState = 'running';
-            }).catch(e => console.log("等待数据加载..."));
-        }, 1000);
-
-        // 启动定时监控：每 5 分钟检查一次新数据
-        startMonitoring();
+        audio.play().then(() => {
+            vinyl.style.animationPlayState = 'running';
+            document.getElementById('status').style.opacity = 1;
+        }).catch(e => alert("音频加载中..."));
     }
 
-    // === 4. 自动监控系统 ===
-    function startMonitoring() {
-        if (monitorInterval) clearInterval(monitorInterval);
-        // 每 5 分钟 (300000 ms) 检查一次
-        monitorInterval = setInterval(() => {
-            loadData(true); // 传入 true 表示这是自动刷新
-        }, 300000); 
-    }
-
-    function playVoice(src, btn) {
-        document.querySelectorAll('.v-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        audio.src = src + `?v=${new Date().getTime()}`;
-        audio.play();
-        vinyl.style.animationPlayState = 'running';
-    }
-
-    // === 5. 同步高亮 ===
+    // 3. 同步高亮
     audio.ontimeupdate = () => {
         if(!audio.duration) return;
         const pct = audio.currentTime / audio.duration;
         const curLen = pct * metaData.total_len;
         
         let activeIdx = -1;
-        let count = metaData.intro_len || 10;
+        let count = metaData.intro_len || 15; // 增加一点开场白缓冲字数
 
         if(curLen > count) {
             for(let i=0; i<newsData.length; i++) {
@@ -291,15 +237,24 @@
             target.classList.add('active');
             target.scrollIntoView({behavior: "smooth", block: "center"});
             
+            // 封面动态变色
             if(idx >= 0 && newsData[idx].category === 'Alpha') {
-                document.getElementById('cover').style.background = '#FCD535';
+                document.getElementById('cover').style.background = '#FCD535'; // 黄
                 document.getElementById('cover').innerText = "ALPHA";
-            } else {
-                document.getElementById('cover').style.background = '#fff';
-                document.getElementById('cover').innerText = "FM";
+                document.getElementById('cover').style.color = "#000";
+            } else if (idx >= 0) {
+                document.getElementById('cover').style.background = '#2b1d3d'; // 紫
+                document.getElementById('cover').innerText = "NEWS";
+                document.getElementById('cover').style.color = "#fff";
             }
         }
     }
+    
+    // 播放结束
+    audio.onended = () => {
+        vinyl.style.animationPlayState = 'paused';
+        document.getElementById('status').style.opacity = 0;
+    };
 </script>
 </body>
 </html>
