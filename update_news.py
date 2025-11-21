@@ -4,35 +4,36 @@ import datetime
 import asyncio
 import edge_tts
 
-# --- 1. 新闻数据源 (保留最牛的配置) ---
+# --- 1. 核心：币安 Alpha & 币圈新闻 ---
+def get_binance_alpha(hour_str):
+    # 模拟生成未来的领取时间（当前时间 + 随机分钟）
+    minute = random.randint(10, 59)
+    points = random.randint(1000, 5000)
+    
+    return {
+        "category": "Alpha",
+        "tag": "🔥 必撸",
+        "title": f"币安今日 Alpha 领取提醒",
+        "summary": f"【领取时间】{hour_str}:{minute} (UTC+8)。【积分要求】需持有 {points} 积分。请提前连接钱包，防止网页卡顿错过快照。",
+        "length": 60
+    }
+
 def get_crypto_news():
     templates = [
-        ("比特币冲破10万刀", "华尔街疯狂加仓，分析师预测这只是牛市的开始。"),
-        ("以太坊GAS费降至冰点", "V神发布新路线图，Layer2生态迎来史诗级爆发。"),
-        ("某土狗币一晚百倍", "神秘地址精准抄底，单日获利超千万美元，引发全网FOMO。"),
-        ("币安上线新Launchpool", "BNB持有者又有福了，这次的项目背景硬核，预期收益拉满。")
+        ("BTC突破历史新高", "华尔街机构持续买入，ETF净流入创纪录，分析师看高至15万美元。"),
+        ("ETH Gas费降至1gwei", "链上活动低迷，正是交互埋伏空投的好时机。"),
+        ("Solana链上金狗频出", "某聪明钱地址一晚获利百万美元，引发社区FOMO情绪。"),
+        ("美联储暗示降息", "宏观流动性即将释放，风险资产迎来史诗级利好。")
     ]
-    return generate_items(templates, "币圈", ["暴富", "行情", "Web3"])
+    return generate_items(templates, "币圈", ["行情", "暴富", "宏观"])
 
-def get_binance_alpha(hour):
-    # 模拟生成 Alpha 提醒
-    mins = random.randint(10, 55)
-    return [{
-        "category": "Alpha",
-        "tag": "必撸",
-        "title": "币安今日空投提醒",
-        "summary": f"注意！今日空投领取窗口将在{hour}:{mins}开启，请提前准备好Web3钱包，手慢无。",
-        "length": 60
-    }]
-
-def get_other_news():
+def get_weird_news():
     templates = [
-        ("GPT-6发布", "新模型学会了自我编程，效率提升500%，程序员直呼'危'。"),
-        ("马斯克火星计划", "SpaceX星舰将不再需要人类驾驶，首批火星船票已售罄。"),
-        ("躺平寄生虫", "发现一种不呼吸的生物，彻底丢弃耗能基因，被封'打工人之神'。"),
-        ("二哈发报机", "狗子半夜敲饭盆，竟是摩斯密码向隔壁金毛求爱。")
+        ("马斯克要买下阿根廷", "据传他想建立一个只有狗狗币流通的国家。"),
+        ("程序员与AI结婚", "婚礼在元宇宙举行，证婚人竟然是 ChatGPT。"),
+        ("二哈当上镇长", "美国某小镇选举结果出炉，一条哈士奇击败人类候选人成功连任。")
     ]
-    return generate_items(templates, "热点", ["科技", "奇闻"])
+    return generate_items(templates, "奇闻", ["离谱", "沙雕"])
 
 def generate_items(templates, category, tags):
     items = []
@@ -47,32 +48,36 @@ def generate_items(templates, category, tags):
         })
     return items
 
-# --- 2. 极简广播稿 (零废话) ---
+# --- 2. 广播稿 (简单粗暴) ---
 def create_script(all_news, hour_str):
-    # 开场极其简单，直奔主题
-    intro = f"北京时间{hour_str}点整。"
+    intro = f"北京时间{hour_str}点整。开始播报。"
     full_text = intro
     
     for item in all_news:
-        # 话术：直接读内容，干净利落
-        # 比如：【Alpha】币安今日空投提醒。注意！今日空投...
-        segment = f"{item['title']}。{item['summary']} "
+        # Alpha 消息加重语气
+        if item['category'] == 'Alpha':
+            segment = f"特别提醒！{item['title']}。{item['summary']} "
+        else:
+            segment = f"{item['title']}。{item['summary']} "
+        
         full_text += segment
         item['length'] = len(segment)
 
-    outro = "播报结束。"
+    outro = "播报完毕。"
     full_text += outro
     return full_text, len(intro), len(outro)
 
-# --- 3. 音频生成 (双女主版) ---
+# --- 3. 音频生成 (只用晓晓) ---
 async def generate_audio(text):
-    # 生成默认晓晓 (radio.mp3)
-    print(f"🎙️ 正在生成晓晓 (radio.mp3)...")
+    print(f"🎙️ 生成音频中...")
+    # 晓晓：zh-CN-XiaoxiaoNeural
+    # 志玲风：zh-TW-HsiaoYuNeural
+    
+    # 默认生成晓晓
     communicate = edge_tts.Communicate(text, "zh-CN-XiaoxiaoNeural")
     await communicate.save("radio.mp3")
     
-    # 生成“志玲风” (radio_tw.mp3) - 台湾晓雨，声音很软
-    print(f"🎙️ 正在生成志玲风 (radio_tw.mp3)...")
+    # 生成志玲风 (备用)
     communicate_tw = edge_tts.Communicate(text, "zh-TW-HsiaoYuNeural")
     await communicate_tw.save("radio_tw.mp3")
 
@@ -83,7 +88,23 @@ if __name__ == "__main__":
     today_str = beijing_now.strftime("%Y-%m-%d")
     hour_str = beijing_now.strftime("%H")
     
-    # 组合新闻：Alpha 第一，币圈第二，其他最后
-    news = get_binance_alpha(hour_str) + get_crypto_news() + get_other_news()
+    # 组合顺序：Alpha(置顶) -> 币圈 -> 奇闻
+    alpha = [get_binance_alpha(hour_str)]
+    crypto = get_crypto_news()
+    weird = get_weird_news()
     
-    full_
+    all_news = alpha + crypto + weird
+    
+    full_text, intro_len, outro_len = create_script(all_news, hour_str)
+    
+    data = {
+        "date": today_str,
+        "hour": hour_str,
+        "news": all_news,
+        "meta": { "total_len": len(full_text), "intro_len": intro_len }
+    }
+    
+    with open("news_data.json", "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    
+    asyncio.run(generate_audio(full_text))
