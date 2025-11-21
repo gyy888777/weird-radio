@@ -2,173 +2,201 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEWS.FM · 晓晓</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>天下奇闻 · 整点播报</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&display=swap');
 
         :root {
-            --bg: #111;
             --text-main: #fff;
-            --text-sub: rgba(255,255,255,0.5);
-            --accent: #ec4899; /* 默认粉 */
+            --text-sub: rgba(255,255,255,0.6);
+            --accent: #ff4b1f; /* 活力橙红 */
         }
 
         body {
-            margin: 0; background: var(--bg); color: var(--text-main);
-            font-family: 'Noto Sans SC', sans-serif;
+            margin: 0; background: #0f0c29; color: var(--text-main);
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
             height: 100vh; overflow: hidden;
             display: flex; flex-direction: column;
-            transition: background 1s;
         }
 
-        /* 动态背景光 */
-        .ambient-bg {
+        /* --- 1. 动态流体背景 (年轻化核心) --- */
+        .mesh-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 30% 30%, var(--accent), transparent 70%);
-            opacity: 0.15; z-index: -1; transition: background 0.5s;
+            background: linear-gradient(125deg, #0f0c29, #302b63, #24243e);
+            z-index: -2;
+        }
+        .mesh-blob {
+            position: absolute; filter: blur(80px); opacity: 0.6;
+            animation: float 20s infinite ease-in-out alternate;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #ff4b1f; animation-delay: -5s; }
+        .blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #1fddff; animation-delay: -2s; }
+        .blob-3 { top: 40%; left: 40%; width: 40vw; height: 40vw; background: #c026d3; animation-delay: -8s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, -50px) scale(1.1); }
         }
 
-        /* 全屏遮罩 (用于自动播放) */
+        /* 全屏遮罩 */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 999;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(20px); z-index: 999;
             display: flex; flex-direction: column;
             justify-content: center; align-items: center;
-            cursor: pointer; backdrop-filter: blur(10px);
-            transition: opacity 0.5s;
+            cursor: pointer; transition: opacity 0.5s;
         }
         .overlay.hidden { opacity: 0; pointer-events: none; }
-        .play-icon-big {
-            font-size: 80px; color: #fff; margin-bottom: 20px;
-            filter: drop-shadow(0 0 20px rgba(255,255,255,0.5));
+        .play-circle {
+            width: 80px; height: 80px; border-radius: 50%; background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 30px rgba(255,255,255,0.4); animation: pulse 2s infinite;
         }
+        .play-circle svg { width: 30px; height: 30px; fill: #000; margin-left: 5px; }
+        @keyframes pulse { 0% {box-shadow: 0 0 0 0 rgba(255,255,255,0.4);} 70% {box-shadow: 0 0 0 20px rgba(255,255,255,0);} 100% {box-shadow: 0 0 0 0 rgba(255,255,255,0);} }
 
-        /* 主布局 */
+        /* 顶部 */
+        header {
+            padding: 20px 40px; display: flex; align-items: center; justify-content: space-between;
+            z-index: 10;
+        }
+        .brand { font-size: 20px; font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+        .live-badge { background: #e60000; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+        .update-time { font-size: 12px; color: var(--text-sub); font-family: monospace; }
+
+        /* 主容器 */
         .container {
             flex: 1; display: flex; align-items: center; justify-content: center;
-            max-width: 1200px; margin: 0 auto; width: 100%; gap: 80px; padding: 40px; box-sizing: border-box;
+            max-width: 1200px; margin: 0 auto; width: 100%; gap: 80px; padding: 0 40px;
+            box-sizing: border-box; z-index: 1;
         }
 
-        /* 左侧：黑胶唱片 */
-        .disc-wrapper {
-            width: 380px; height: 380px; position: relative; flex-shrink: 0;
+        /* 左侧：黑胶 */
+        .left-side { flex-shrink: 0; text-align: center; }
+        .disc-wrap {
+            width: 350px; height: 350px; position: relative; 
+            margin-bottom: 30px;
         }
-        .vinyl-disc {
+        .disc {
             width: 100%; height: 100%; border-radius: 50%;
-            background: repeating-radial-gradient(#111 0, #111 2px, #222 3px, #222 4px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-            display: flex; justify-content: center; align-items: center;
-            animation: spin 20s linear infinite;
-            animation-play-state: paused;
-            border: 5px solid #050505;
+            background: radial-gradient(#111 0%, #111 30%, #222 31%, #111 32%, #111 40%, #222 41%, #111 42%);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            border: 2px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center;
+            animation: spin 20s linear infinite; animation-play-state: paused;
         }
-        .vinyl-disc::before { /* 光泽 */
-            content:''; position:absolute; top:0; left:0; width:100%; height:100%; border-radius:50%;
-            background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%);
+        .disc-cover {
+            width: 200px; height: 200px; border-radius: 50%;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); /* 默认封面色 */
+            display: flex; align-items: center; justify-content: center;
+            color: #000; font-weight: 900; font-size: 24px; border: 5px solid #111;
         }
-        .cover-art {
-            width: 220px; height: 220px; border-radius: 50%;
-            background-size: cover; background-position: center;
-            border: 8px solid #111; position: relative; z-index: 2;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 24px; font-weight: 900; text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            background-color: var(--accent); /* 默认色 */
-            transition: background-color 0.5s;
-        }
-        
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* 右侧：滚动歌词 */
-        .lyrics-box {
-            flex: 1; height: 400px; overflow-y: auto;
+        /* 右侧：歌词列表 (聚焦模式) */
+        .right-side {
+            flex: 1; height: 50vh; overflow-y: scroll;
+            /* 顶部和底部渐隐遮罩 */
             mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
-            scrollbar-width: none; position: relative;
+            scrollbar-width: none;
         }
-        .lyrics-box::-webkit-scrollbar { display: none; }
+        .right-side::-webkit-scrollbar { display: none; }
 
-        .line {
-            padding: 18px 0; font-size: 18px; color: var(--text-sub);
-            transition: 0.4s; transform-origin: left center; cursor: pointer;
-            line-height: 1.6;
+        .news-row {
+            padding: 25px 0; transition: 0.5s; cursor: pointer;
+            opacity: 0.4; transform: scale(0.95); filter: blur(1px); transform-origin: left center;
         }
-        .line:hover { color: #ccc; }
-        .line.active {
-            color: #fff; font-size: 26px; font-weight: bold;
-            text-shadow: 0 0 20px rgba(255,255,255,0.2);
-            transform: scale(1.05);
-        }
-        .line-tag {
-            font-size: 12px; padding: 2px 8px; border-radius: 4px; 
-            vertical-align: middle; margin-right: 10px; border: 1px solid currentColor;
-            opacity: 0.7;
-        }
-
-        /* 底部控制栏 */
-        .footer {
-            height: 90px; display: flex; align-items: center; padding: 0 40px;
-            background: rgba(20,20,20,0.8); backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255,255,255,0.1);
-            z-index: 100; gap: 20px;
-        }
-        .track-info { width: 200px; }
-        .track-title { font-size: 16px; font-weight: bold; white-space: nowrap; }
-        .track-time { font-size: 12px; color: #888; }
-
-        .controls { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .btns { display: flex; align-items: center; gap: 20px; }
-        .c-btn { background:none; border:none; color:#fff; cursor:pointer; }
-        .play-c { width: 40px; height: 40px; background:#fff; color:#000; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:20px;}
+        .news-row:hover { opacity: 0.8; filter: blur(0); }
         
-        .prog-bar { width: 100%; max-width: 500px; height: 4px; background: #444; border-radius: 2px; position: relative; overflow: hidden; }
-        .prog-fill { height: 100%; background: #fff; width: 0%; border-radius: 2px; }
+        .news-row.active {
+            opacity: 1; transform: scale(1); filter: blur(0);
+            text-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+
+        .tag { font-size: 12px; font-weight: bold; padding: 4px 8px; border-radius: 6px; background: rgba(255,255,255,0.2); margin-right: 10px; vertical-align: middle; }
+        .title { font-size: 22px; font-weight: bold; margin-bottom: 8px; line-height: 1.3; }
+        .desc { font-size: 15px; color: rgba(255,255,255,0.8); line-height: 1.6; font-weight: 400; }
+
+        /* 底部悬浮岛 */
+        .dock {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 500px; height: 70px;
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(30px);
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 40px;
+            display: flex; align-items: center; padding: 0 20px; gap: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3); z-index: 100;
+        }
+
+        .play-btn {
+            width: 45px; height: 45px; border-radius: 50%; background: #fff;
+            border: none; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; flex-shrink: 0; transition: 0.2s;
+        }
+        .play-btn:active { transform: scale(0.9); }
+        .play-btn svg { width: 18px; height: 18px; fill: #000; }
+
+        .progress-area { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 5px; }
+        .progress-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; }
+        .progress-fill { width: 0%; height: 100%; background: #fff; transition: width 0.1s linear; }
+        .time-info { font-size: 10px; color: rgba(255,255,255,0.6); font-family: monospace; display: flex; justify-content: space-between; }
 
         /* 移动端适配 */
         @media (max-width: 768px) {
             .container { flex-direction: column; gap: 30px; padding: 20px; }
-            .disc-wrapper { width: 260px; height: 260px; }
-            .cover-art { width: 150px; height: 150px; font-size: 18px; }
-            .line.active { font-size: 20px; }
+            .disc-wrap { width: 200px; height: 200px; margin-bottom: 10px; }
+            .disc-cover { width: 120px; height: 120px; font-size: 16px; }
+            .right-side { width: 100%; height: 40vh; mask-image: none; }
+            .news-row { padding: 15px 0; opacity: 1; filter: blur(0); transform: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
+            .news-row.active { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; }
+            .title { font-size: 18px; }
         }
     </style>
 </head>
 <body>
 
-<div class="overlay" id="overlay" onclick="startApp()">
-    <div class="play-icon-big">▶</div>
-    <div style="font-size: 18px; letter-spacing: 2px;">点击任意处开始收听</div>
-    <div style="font-size: 12px; color: #888; margin-top: 10px;">今日资讯 · 晓晓播报</div>
+<div class="mesh-bg">
+    <div class="mesh-blob blob-1"></div>
+    <div class="mesh-blob blob-2"></div>
+    <div class="mesh-blob blob-3"></div>
 </div>
 
-<div class="ambient-bg" id="ambientBg"></div>
+<div class="overlay" id="overlay" onclick="startApp()">
+    <div class="play-circle">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </div>
+    <div style="margin-top: 20px; font-size: 18px; font-weight: bold;">点击开启今日奇闻</div>
+</div>
+
+<header>
+    <div class="brand">
+        <span class="live-badge">LIVE</span> 天下奇闻 · 整点播报
+    </div>
+    <div class="update-time" id="timeStr">--:-- 更新</div>
+</header>
 
 <div class="container">
-    <div class="disc-wrapper">
-        <div class="vinyl-disc" id="vinyl">
-            <div class="cover-art" id="coverArt">NEWS</div>
+    <div class="left-side">
+        <div class="disc-wrap">
+            <div class="disc" id="disc">
+                <div class="disc-cover" id="coverArt">NEWS</div>
+            </div>
         </div>
+        <h2 id="currentCategory" style="margin:0; font-size:24px; text-shadow:0 0 20px rgba(255,255,255,0.3);">整点新闻</h2>
     </div>
 
-    <div class="lyrics-box" id="lyricsBox">
-        </div>
+    <div class="right-side" id="newsList"></div>
 </div>
 
-<div class="footer">
-    <div class="track-info">
-        <div class="track-title">全网资讯通</div>
-        <div class="track-time" id="updateTime">Loading...</div>
-    </div>
-    <div class="controls">
-        <div class="btns">
-            <button class="c-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
-            <button class="c-btn play-c" id="playBtn" onclick="togglePlay()">II</button>
-            <button class="c-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
-        </div>
-        <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
-    </div>
-    <div style="width:100px; text-align:right; font-size:12px; font-family:monospace;">
-        <span id="currTime">0:00</span> / <span id="durTime">0:00</span>
+<div class="dock">
+    <button class="play-btn" id="playBtn">
+        <svg id="iconPlay" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="iconPause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+    </button>
+    <div class="progress-area">
+        <div class="time-info"><span id="currTime">00:00</span><span id="totalTime">00:00</span></div>
+        <div class="progress-bg"><div class="progress-fill" id="progFill"></div></div>
     </div>
 </div>
 
@@ -176,89 +204,94 @@
 
 <script>
     const audio = document.getElementById('audio');
-    const vinyl = document.getElementById('vinyl');
-    const lyricsBox = document.getElementById('lyricsBox');
+    const playBtn = document.getElementById('playBtn');
+    const disc = document.getElementById('disc');
     const coverArt = document.getElementById('coverArt');
-    const ambientBg = document.getElementById('ambientBg');
-    const ts = new Date().getTime();
-
+    const currentCategory = document.getElementById('currentCategory');
+    
     let newsData = [];
     let metaData = {};
+    const ts = new Date().getTime();
 
-    // 配色表
-    const colors = {
-        '科技': '#3b82f6', // 蓝
-        '娱乐': '#ec4899', // 粉
-        '奇闻': '#eab308', // 黄
-        'default': '#1db954'
+    // 潮流配色 (对应 科技/娱乐/奇闻)
+    const catColors = {
+        '科技': 'linear-gradient(135deg, #3b82f6, #2dd4bf)',
+        '娱乐': 'linear-gradient(135deg, #ec4899, #8b5cf6)',
+        '奇闻': 'linear-gradient(135deg, #f59e0b, #ef4444)',
+        'default': 'linear-gradient(135deg, #ffffff, #999999)'
     };
 
-    // 1. 初始化数据
+    // 1. 加载数据
     fetch(`news_data.json?t=${ts}`)
         .then(res => res.json())
         .then(data => {
             newsData = data.news;
             metaData = data.meta;
-            document.getElementById('updateTime').innerText = `${data.date} ${data.hour}:00 更新`;
+            document.getElementById('timeStr').innerText = `${data.date} ${data.hour}:00`;
             
             // 渲染列表
             renderList();
             
-            // 预加载音频 (晓晓)
+            // 预加载晓晓音频
             audio.src = `radio_xiaoxiao.mp3?v=${ts}`;
         });
 
     function renderList() {
-        let html = `<div class="line active" id="line-intro">
-            <div style="font-size:14px; opacity:0.5; margin-bottom:5px;">OPENING</div>
-            北京时间整点新闻，即将开始...
+        const list = document.getElementById('newsList');
+        list.innerHTML = `<div class="news-row active" id="row-intro">
+            <div class="title">👋 欢迎收听</div>
+            <div class="desc">天下奇闻 · 整点播报即将开始...</div>
         </div>`;
 
         newsData.forEach((item, i) => {
-            html += `
-                <div class="line" id="line-${i}" onclick="seekTo(${i})">
-                    <span class="line-tag">${item.category}</span>
-                    ${item.title}
-                    <div style="font-size:14px; opacity:0.6; font-weight:400; margin-top:5px;">${item.summary}</div>
+            list.innerHTML += `
+                <div class="news-row" id="row-${i}" onclick="seekTo(${i})">
+                    <div><span class="tag">${item.category}</span></div>
+                    <div class="title">${item.title}</div>
+                    <div class="desc">${item.summary}</div>
                 </div>
             `;
         });
-        
-        html += `<div style="height:200px;"></div>`; // 底部留白
-        lyricsBox.innerHTML = html;
+        list.innerHTML += `<div style="height:200px"></div>`;
     }
 
-    // 2. 启动逻辑
+    // 2. 启动与播放
     function startApp() {
         document.getElementById('overlay').classList.add('hidden');
         audio.play().then(() => {
-            vinyl.style.animationPlayState = 'running';
-        }).catch(e => console.log("播放被拦截"));
+            disc.style.animationPlayState = 'running';
+            updatePlayIcon(true);
+        }).catch(e => alert("音频加载中，请稍后再试"));
     }
 
-    function togglePlay() {
+    playBtn.onclick = () => {
         if(audio.paused) {
             audio.play();
-            document.getElementById('playBtn').innerText = "II";
-            vinyl.style.animationPlayState = 'running';
+            disc.style.animationPlayState = 'running';
+            updatePlayIcon(true);
         } else {
             audio.pause();
-            document.getElementById('playBtn').innerText = "▶";
-            vinyl.style.animationPlayState = 'paused';
+            disc.style.animationPlayState = 'paused';
+            updatePlayIcon(false);
         }
+    };
+
+    function updatePlayIcon(isPlaying) {
+        document.getElementById('iconPlay').style.display = isPlaying ? 'none' : 'block';
+        document.getElementById('iconPause').style.display = isPlaying ? 'block' : 'none';
     }
 
-    // 3. 核心同步算法
+    // 3. 核心同步与高亮
     audio.ontimeupdate = () => {
-        if (!audio.duration) return;
-
+        if(!audio.duration) return;
+        
         // 进度条
         const pct = audio.currentTime / audio.duration;
         document.getElementById('progFill').style.width = (pct * 100) + '%';
         document.getElementById('currTime').innerText = fmt(audio.currentTime);
-        document.getElementById('durTime').innerText = fmt(audio.duration);
+        document.getElementById('totalTime').innerText = fmt(audio.duration);
 
-        // 高亮计算
+        // 字数估算高亮
         const totalLen = metaData.total_len;
         const currentLen = pct * totalLen;
         
@@ -266,7 +299,7 @@
         let count = metaData.intro_len;
 
         if (currentLen < count) {
-            activeIdx = -1; // 开场白
+            activeIdx = -1; 
         } else {
             for (let i = 0; i < newsData.length; i++) {
                 count += newsData[i].length;
@@ -282,26 +315,28 @@
 
     let lastIdx = -99;
     function highlight(idx) {
-        if (idx === lastIdx) return;
+        if(idx === lastIdx) return;
         lastIdx = idx;
 
-        // 样式更新
-        document.querySelectorAll('.line').forEach(el => el.classList.remove('active'));
-        const target = document.getElementById(idx === -1 ? 'line-intro' : `line-${idx}`);
-        if (target) {
+        document.querySelectorAll('.news-row').forEach(el => el.classList.remove('active'));
+        const target = document.getElementById(idx === -1 ? 'row-intro' : `row-${idx}`);
+        
+        if(target) {
             target.classList.add('active');
-            target.scrollIntoView({ behavior: "smooth", block: "center" });
+            target.scrollIntoView({behavior: "smooth", block: "center"});
             
-            // 更新封面和背景色
-            if (idx >= 0) {
+            // 更新左侧封面
+            if(idx >= 0) {
                 const cat = newsData[idx].category;
-                const color = colors[cat];
-                coverArt.style.backgroundColor = color;
+                coverArt.style.background = catColors[cat];
                 coverArt.innerText = cat;
-                ambientBg.style.background = `radial-gradient(circle at 30% 30%, ${color}, transparent 70%)`;
+                currentCategory.innerText = cat + " NEWS";
+                // 改变光斑颜色 (可选高级效果)
+                document.querySelector('.blob-1').style.background = cat === '科技' ? '#3b82f6' : (cat === '娱乐' ? '#ec4899' : '#f59e0b');
             } else {
-                coverArt.style.backgroundColor = '#333';
+                coverArt.style.background = catColors['default'];
                 coverArt.innerText = "NEWS";
+                currentCategory.innerText = "整点播报";
             }
         }
     }
@@ -310,11 +345,10 @@
         return `${Math.floor(s/60)}:${Math.floor(s%60).toString().padStart(2,'0')}`;
     }
 
-    // 模拟跳转 (简单版)
+    // 简易跳转
     function seekTo(idx) {
-        // 这是一个估算跳转，因为没有精确时间轴
         const per = audio.duration / (newsData.length + 1);
-        audio.currentTime = (idx + 1) * per; 
+        audio.currentTime = (idx + 1) * per;
     }
 
 </script>
