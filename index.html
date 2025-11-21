@@ -2,352 +2,316 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全网资讯通 · Music Style</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>全网资讯通 · 极速版</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&display=swap');
 
         :root {
-            --bg: #252525;
-            --sidebar: #1a1a1a;
-            --bar: rgba(30, 30, 30, 0.95);
-            --accent: #eb3838; /* 网易红 */
-            --text-main: #e0e0e0;
-            --text-sub: #7c7c7c;
-            --glass: rgba(255, 255, 255, 0.03);
+            --primary: #fff;
+            --glass: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --active-card: rgba(255, 255, 255, 0.25);
         }
 
         body {
-            margin: 0; padding: 0; background: var(--bg); color: var(--text-main);
-            font-family: 'Noto Sans SC', sans-serif;
-            height: 100vh; overflow: hidden;
-            display: flex; flex-direction: column;
+            margin: 0; overflow: hidden; 
+            font-family: 'Noto Sans SC', sans-serif; color: #fff;
+            background: #0f0c29;
+            /* 动态弥散背景 */
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            height: 100vh; display: flex; flex-direction: column;
         }
 
-        /* 全局毛玻璃背景 */
-        #bg-blur {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('https://source.unsplash.com/random/1920x1080/?technology,abstract'); 
-            background-size: cover; background-position: center;
-            filter: blur(60px) brightness(0.4);
-            z-index: -1; transition: background-image 1s;
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        /* 中间主体区 */
-        .main-container {
-            flex: 1; display: flex; width: 100%; max-width: 1200px; margin: 0 auto;
-            height: calc(100vh - 80px); /* 减去底部控制条 */
-            align-items: center; justify-content: center;
-        }
-
-        /* 左侧：唱片封面区 */
-        .left-panel {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 40px;
-        }
-        
-        .disc-container {
-            width: 300px; height: 300px; position: relative;
-            display: flex; align-items: center; justify-content: center;
-        }
-        
-        .disc-bg {
-            width: 100%; height: 100%; border-radius: 50%;
-            background: #000;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            position: absolute;
-            display: flex; align-items: center; justify-content: center;
-            animation: rotate 20s linear infinite;
-            animation-play-state: paused;
-        }
-        .disc-bg::after { /* 黑胶纹路 */
-            content: ''; width: 90%; height: 90%; border-radius: 50%;
-            border: 2px solid #222;
-        }
-
-        .cover-img {
-            width: 200px; height: 200px; border-radius: 50%;
-            background: linear-gradient(135deg, #444, #222);
-            background-size: cover; background-position: center;
-            z-index: 2;
-        }
-
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        .track-info { text-align: center; margin-top: 30px; }
-        .track-name { font-size: 24px; font-weight: bold; margin-bottom: 8px; }
-        .track-artist { font-size: 14px; color: var(--text-sub); }
-
-        /* 右侧：歌词（新闻列表）区 */
-        .right-panel {
-            flex: 1.2; height: 70%; overflow-y: auto;
-            padding: 0 40px;
-            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-            -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-            scrollbar-width: none; /* 隐藏滚动条 */
-        }
-        .right-panel::-webkit-scrollbar { display: none; }
-
-        .lyric-line {
-            padding: 15px 0; color: var(--text-sub);
-            transition: 0.3s; cursor: pointer;
-            border-radius: 8px;
-        }
-        .lyric-line:hover { color: #fff; background: rgba(255,255,255,0.05); padding-left: 10px;}
-        
-        .lyric-line.active {
-            color: #fff; font-size: 18px; font-weight: bold;
-            text-shadow: 0 0 10px rgba(255,255,255,0.3);
-        }
-        .lyric-tag {
-            display: inline-block; font-size: 10px; padding: 2px 6px; 
-            border-radius: 4px; margin-right: 8px; vertical-align: text-top;
-        }
-
-        /* 底部控制条 */
-        .bottom-bar {
-            height: 80px; background: var(--bar);
-            backdrop-filter: blur(20px);
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 30px; box-shadow: 0 -2px 20px rgba(0,0,0,0.3);
+        /* 顶部固定区 */
+        header {
+            padding: 15px 20px;
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
             z-index: 10;
+            display: flex; flex-direction: column; gap: 10px;
         }
 
-        .controls { display: flex; align-items: center; gap: 20px; }
-        .icon-btn { 
-            background: none; border: none; color: #fff; cursor: pointer; 
-            opacity: 0.8; transition: 0.2s; padding: 0;
-        }
-        .icon-btn:hover { opacity: 1; color: var(--accent); }
-        .play-round {
-            width: 45px; height: 45px; border-radius: 50%; background: var(--accent);
-            color: #fff; display: flex; align-items: center; justify-content: center;
-            font-size: 20px;
-        }
-        .play-round:hover { transform: scale(1.05); background: #ff4d4d; opacity: 1;}
+        .top-bar { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 900; font-size: 20px; letter-spacing: 1px; }
+        .live-tag { background: #f00; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
 
-        /* 进度条 */
-        .progress-area { flex: 1; margin: 0 40px; display: flex; align-items: center; gap: 10px; color: #888; font-size: 12px; }
-        .bar-bg { 
-            flex: 1; height: 4px; background: #444; border-radius: 2px; 
-            cursor: pointer; position: relative;
+        /* 声音选择器 (胶囊风格) */
+        .voice-scroll {
+            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px;
+            scrollbar-width: none;
         }
-        .bar-fill { 
-            width: 0%; height: 100%; background: var(--accent); border-radius: 2px; 
-            position: relative;
+        .voice-btn {
+            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3); 
+            color: #ddd; padding: 6px 16px; border-radius: 20px; 
+            font-size: 13px; white-space: nowrap; cursor: pointer; transition: 0.2s;
         }
-        .bar-fill::after {
-            content: ''; width: 10px; height: 10px; background: #fff; border-radius: 50%;
-            position: absolute; right: -5px; top: -3px; opacity: 0; transition: 0.2s;
+        .voice-btn.active {
+            background: #fff; color: #000; border-color: #fff; font-weight: bold; transform: scale(1.05);
         }
-        .progress-area:hover .bar-fill::after { opacity: 1; }
 
-        /* 声音切换 */
-        .voice-menu { display: flex; gap: 10px; }
-        .v-btn { 
-            background: transparent; border: 1px solid #555; color: #888; 
-            padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; 
+        /* 中间内容区 */
+        main {
+            flex: 1; overflow-y: auto; padding: 20px;
+            scroll-behavior: smooth;
         }
-        .v-btn.active { border-color: var(--accent); color: var(--accent); }
+        /* 隐藏滚动条但可滚动 */
+        main::-webkit-scrollbar { display: none; }
 
-        /* 移动端适配 */
-        @media (max-width: 768px) {
-            .main-container { flex-direction: column; }
-            .left-panel { height: 35vh; padding: 20px; }
-            .disc-container { width: 200px; height: 200px; }
-            .cover-img { width: 130px; height: 130px; }
-            .right-panel { height: auto; flex: 1; width: 90%; padding: 0; }
-            .lyric-line { font-size: 14px; padding: 10px 0; }
-            .lyric-line.active { font-size: 16px; }
+        .card {
+            background: var(--glass); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 16px; margin-bottom: 12px;
+            transition: 0.3s; transform-origin: left center;
+            opacity: 0.7; filter: blur(0.5px);
         }
+        
+        /* 高亮状态 */
+        .card.active {
+            opacity: 1; filter: blur(0);
+            background: var(--active-card);
+            border-left: 6px solid #fff;
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .tag-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .tag { font-size: 10px; padding: 3px 8px; border-radius: 6px; font-weight: bold; color: #000; }
+        .tag.tech { background: #60a5fa; }
+        .tag.ent { background: #f472b6; }
+        .tag.weird { background: #facc15; }
+
+        .title { font-size: 16px; font-weight: bold; line-height: 1.4; margin-bottom: 6px; }
+        .summary { font-size: 13px; line-height: 1.6; opacity: 0.8; }
+
+        /* 底部控制栏 (悬浮岛风格) */
+        .dock {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(20px);
+            border-radius: 30px; padding: 10px 20px;
+            display: flex; align-items: center; gap: 15px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            z-index: 20;
+        }
+
+        .play-btn {
+            width: 45px; height: 45px; border-radius: 50%; background: #fff; border: none;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            flex-shrink: 0;
+        }
+        .play-btn svg { width: 20px; height: 20px; fill: #000; }
+
+        .info-area { flex: 1; overflow: hidden; }
+        .now-playing { font-size: 12px; opacity: 0.7; white-space: nowrap; }
+        .progress-bar {
+            height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; margin-top: 5px;
+            position: relative; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; background: #fff; width: 0%; border-radius: 2px;
+            transition: width 0.2s linear;
+        }
+
+        /* 波形动画 */
+        .viz { display: flex; gap: 3px; height: 20px; align-items: center; }
+        .bar { width: 3px; background: #fff; height: 5px; border-radius: 2px; }
+
     </style>
 </head>
 <body>
 
-<div id="bg-blur"></div>
-
-<div class="main-container">
-    <div class="left-panel">
-        <div class="disc-container">
-            <div class="disc-bg" id="disc">
-                <div class="cover-img" id="coverImg"></div>
-            </div>
-        </div>
-        <div class="track-info">
-            <div class="track-name" id="headerTitle">今日资讯</div>
-            <div class="track-artist" id="headerTime">AI 主播 · Loading...</div>
-        </div>
+<header>
+    <div class="top-bar">
+        <div class="logo">NEWS.FM</div>
+        <div class="live-tag">LIVE <span id="timeStr">00:00</span></div>
     </div>
-
-    <div class="right-panel" id="lyricBox">
+    <div class="voice-scroll" id="voiceBox">
         </div>
+</header>
+
+<main id="newsList">
+    </main>
+
+<div class="dock">
+    <button class="play-btn" id="playBtn">
+        <svg id="iconPlay" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="iconPause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+    </button>
+    <div class="info-area">
+        <div class="now-playing" id="statusText">准备就绪...</div>
+        <div class="progress-bar"><div class="progress-fill" id="progFill"></div></div>
+    </div>
+    <div class="viz" id="viz"></div>
 </div>
 
-<div class="bottom-bar">
-    <div class="controls">
-        <button class="icon-btn"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
-        <button class="icon-btn play-round" id="playBtn">▶</button>
-        <button class="icon-btn"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
-    </div>
-
-    <div class="progress-area">
-        <span id="currTime">00:00</span>
-        <div class="bar-bg" id="progBg">
-            <div class="bar-fill" id="progFill"></div>
-        </div>
-        <span id="totalTime">00:00</span>
-    </div>
-
-    <div class="voice-menu" id="voiceContainer">
-        </div>
-</div>
-
-<audio id="audio" style="display:none;"></audio>
+<audio id="audio"></audio>
 
 <script>
-    // 1. 数据初始化
+    // 1. UI 初始化
+    const viz = document.getElementById('viz');
+    for(let i=0; i<6; i++) {
+        let b = document.createElement('div');
+        b.className = 'bar';
+        viz.appendChild(b);
+    }
+
     const audio = document.getElementById('audio');
     const playBtn = document.getElementById('playBtn');
-    const disc = document.getElementById('disc');
-    const lyricBox = document.getElementById('lyricBox');
     const progFill = document.getElementById('progFill');
-    
-    let newsList = [];
+    const statusText = document.getElementById('statusText');
+    const ts = new Date().getTime();
+
+    let newsData = [];
+    let metaData = {}; // 存放字数信息
     let currentVoice = 'yunxi';
-    let ts = new Date().getTime(); // 强制刷新缓存
+    let vizTimer;
 
     // 2. 加载数据
     fetch(`news_data.json?t=${ts}`)
         .then(res => res.json())
         .then(data => {
-            newsList = data.news;
-            document.getElementById('headerTime').innerText = `${data.date} ${data.hour}:00 更新`;
-            
-            // 声音按钮
-            const vContainer = document.getElementById('voiceContainer');
+            newsData = data.news;
+            metaData = data.meta;
+            document.getElementById('timeStr').innerText = `${data.hour}:00`;
+
+            // 渲染声音按钮
+            const vBox = document.getElementById('voiceBox');
             data.voices.forEach(v => {
                 let btn = document.createElement('button');
-                btn.className = `v-btn ${v.id === currentVoice ? 'active' : ''}`;
-                btn.innerText = v.label.split('·')[0];
-                btn.onclick = () => changeVoice(v.id, btn);
-                vContainer.appendChild(btn);
+                btn.className = `voice-btn ${v.id===currentVoice ? 'active':''}`;
+                btn.innerText = v.label;
+                btn.onclick = () => switchVoice(v.id, btn);
+                vBox.appendChild(btn);
             });
 
-            // 渲染列表
-            renderList();
+            // 渲染新闻列表
+            const list = document.getElementById('newsList');
+            list.innerHTML = '';
             
-            // 加载音频
+            // 插入一个开场白占位卡片
+            list.innerHTML += `<div class="card active" id="card-intro"><div class="title">👋 欢迎收听</div><div class="summary">正在为您加载今日热点资讯...</div></div>`;
+
+            data.news.forEach((item, idx) => {
+                // 根据分类定色
+                let tagClass = 'tech';
+                if(item.category=='娱乐') tagClass='ent';
+                if(item.category=='奇闻') tagClass='weird';
+
+                list.innerHTML += `
+                    <div class="card" id="card-${idx}">
+                        <div class="tag-row">
+                            <span class="tag ${tagClass}">${item.category}</span>
+                        </div>
+                        <div class="title">${item.title}</div>
+                        <div class="summary">${item.summary}</div>
+                    </div>
+                `;
+            });
+
+            // 预加载音频
             audio.src = `radio_${currentVoice}.mp3?v=${ts}`;
+            statusText.innerText = "点击播放开始收听";
         })
-        .catch(err => console.error("数据加载失败", err));
+        .catch(() => statusText.innerText = "数据加载失败");
 
-    function renderList() {
-        lyricBox.innerHTML = "";
-        newsList.forEach((item, index) => {
-            // 分类颜色
-            let color = '#888';
-            if(item.category=='科技') color='#3b82f6';
-            if(item.category=='娱乐') color='#ec4899';
-            if(item.category=='奇闻') color='#eab308';
-
-            let div = document.createElement('div');
-            div.className = 'lyric-line';
-            div.id = 'line-' + index;
-            div.innerHTML = `
-                <span class="lyric-tag" style="background:${color};color:#fff">${item.category}</span>
-                ${item.title}
-                <div style="font-size:12px; margin-top:4px; opacity:0.7">${item.summary}</div>
-            `;
-            div.onclick = () => seekToNews(index);
-            lyricBox.appendChild(div);
-        });
-    }
-
-    // 3. 播放控制
-    function togglePlay() {
-        if (audio.paused) {
-            audio.play().then(() => {
-                playBtn.innerText = "II";
-                disc.style.animationPlayState = "running";
-            }).catch(e => alert("音频加载中，请稍等..."));
-        } else {
-            audio.pause();
-            playBtn.innerText = "▶";
-            disc.style.animationPlayState = "paused";
-        }
-    }
-    playBtn.onclick = togglePlay;
-
-    function changeVoice(id, btn) {
+    // 3. 切换声音
+    function switchVoice(id, btn) {
         if(id === currentVoice) return;
         currentVoice = id;
-        
-        // UI 更新
-        document.querySelectorAll('.v-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.voice-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-
-        // 切换源
-        let wasPlaying = !audio.paused;
+        
+        const wasPlaying = !audio.paused;
         audio.src = `radio_${id}.mp3?v=${new Date().getTime()}`;
         if(wasPlaying) audio.play();
     }
 
-    // 4. 进度与高亮 (核心算法：估算进度)
+    // 4. 播放与动画
+    function togglePlay() {
+        if (audio.paused) {
+            audio.play();
+            document.getElementById('iconPlay').style.display = 'none';
+            document.getElementById('iconPause').style.display = 'block';
+            statusText.innerText = "正在播报...";
+            
+            // 波形跳动
+            vizTimer = setInterval(() => {
+                document.querySelectorAll('.bar').forEach(b => {
+                    b.style.height = Math.random() * 16 + 4 + 'px';
+                });
+            }, 100);
+        } else {
+            audio.pause();
+            document.getElementById('iconPlay').style.display = 'block';
+            document.getElementById('iconPause').style.display = 'none';
+            statusText.innerText = "已暂停";
+            clearInterval(vizTimer);
+        }
+    }
+    playBtn.onclick = togglePlay;
+
+    // 5. 核心算法：字数同步 (Word-Count Sync)
     audio.ontimeupdate = () => {
-        // 进度条
-        if (audio.duration) {
-            const percent = (audio.currentTime / audio.duration) * 100;
-            progFill.style.width = percent + '%';
-            document.getElementById('currTime').innerText = formatTime(audio.currentTime);
-            document.getElementById('totalTime').innerText = formatTime(audio.duration);
-            
-            // 高亮列表 (假设每条新闻平均时长一致，或者根据字数加权)
-            // 这里用一个简单的算法：总时长 / 新闻数量 = 每条大约时长
-            const durationPerItem = audio.duration / newsList.length;
-            const activeIdx = Math.floor(audio.currentTime / durationPerItem);
-            
-            highlightItem(activeIdx);
-        }
-    };
-
-    function highlightItem(idx) {
-        if (idx >= newsList.length) return;
+        if (!audio.duration) return;
         
-        document.querySelectorAll('.lyric-line').forEach(el => el.classList.remove('active'));
-        const el = document.getElementById('line-' + idx);
-        if(el) {
+        const p = audio.currentTime / audio.duration;
+        progFill.style.width = (p * 100) + '%';
+
+        // 计算当前读到哪一段了
+        // 假设语速是均匀的，根据字数比例来分配时间
+        const totalChars = metaData.total_text_len;
+        const currentChars = p * totalChars;
+
+        let countedChars = metaData.intro_len; // 先加上开场白长度
+        let activeIndex = -1; // -1 代表开场白
+
+        if (currentChars < countedChars) {
+            activeIndex = -1;
+        } else {
+            for (let i = 0; i < newsData.length; i++) {
+                countedChars += newsData[i].length;
+                if (currentChars < countedChars) {
+                    activeIndex = i;
+                    break;
+                }
+            }
+        }
+
+        // 高亮当前卡片
+        highlightCard(activeIndex);
+    };
+
+    let lastActiveIndex = -99;
+    function highlightCard(idx) {
+        if (idx === lastActiveIndex) return;
+        lastActiveIndex = idx;
+
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+        
+        let targetId = idx === -1 ? 'card-intro' : `card-${idx}`;
+        let el = document.getElementById(targetId);
+        
+        if (el) {
             el.classList.add('active');
-            // 自动滚动
             el.scrollIntoView({ behavior: "smooth", block: "center" });
-            
-            // 切换封面背景色 (氛围灯)
-            const cat = newsList[idx].category;
-            if(cat=='科技') document.documentElement.style.setProperty('--accent', '#3b82f6');
-            if(cat=='娱乐') document.documentElement.style.setProperty('--accent', '#ec4899');
-            if(cat=='奇闻') document.documentElement.style.setProperty('--accent', '#eab308');
         }
     }
 
-    // 点击列表跳转 (估算)
-    function seekToNews(idx) {
-        if(!audio.duration) return;
-        const durationPerItem = audio.duration / newsList.length;
-        audio.currentTime = idx * durationPerItem + 1; // +1秒缓冲
-        if(audio.paused) togglePlay();
-    }
-
-    // 进度条点击
-    document.getElementById('progBg').onclick = (e) => {
-        const rect = e.target.getBoundingClientRect();
-        const percent = (e.clientX - rect.left) / rect.width;
-        audio.currentTime = percent * audio.duration;
+    audio.onended = () => {
+        togglePlay(); // 重置按钮状态
+        progFill.style.width = '100%';
+        statusText.innerText = "播报结束";
     };
-
-    function formatTime(s) {
-        const m = Math.floor(s/60);
-        const sec = Math.floor(s%60);
-        return `${m}:${sec<10?'0'+sec:sec}`;
-    }
 
 </script>
 </body>
